@@ -199,8 +199,8 @@ NULL_LITERAL: 'null';
 INTEGER_LITERAL: ('0' | [1-9] (Digits?)) [lL]?;
 FLOAT_LITERAL: (Digits '.' Digits) [fFdD]?;
 BOOL_LITERAL: 'true' | 'false';
-CHAR_LITERAL: '\'' (~['\\\r\n]) '\'';
-STRING_LITERAL: '"' (~["\\\r\n])* '"';
+CHAR_LITERAL: '\'' [a-zA-Z !.,?=:()] '\'';
+STRING_LITERAL: '"' [a-zA-Z !.,?=:()]+ '"';
 
 // WHITESPACE, COMMENTS
 WS: [ \t\r\n]+ -> skip ;
