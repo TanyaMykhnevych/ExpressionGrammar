@@ -1,0 +1,9 @@
+void main() {
+	string s = "test string";
+	string str = "!, () : hello";
+	string space = " ";
+	println(s + str);
+	
+	char c = 't';
+	char ch = '!';
+}

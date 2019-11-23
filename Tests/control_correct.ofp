@@ -1,0 +1,32 @@
+void main() {
+	char[] charArr = {'a','b','c','d','e','f'};
+	char[] result = copy(charArr);
+	max('a', 'b', 'c');
+}
+
+char[] copy(char[] charArr) {
+	char[] newCharArr = new char[charArr.length];
+	int i = 0;
+	while(i < newCharArr.lenght) {
+		newCharArr[i] = charArr[i];
+		i = i + 1;
+	}
+}
+
+char max(char a, char b, char c) {
+	   if (a > b) {
+	      if (a > c) 
+	   	  	 return a;
+	   	  else if (c > a)
+	   	     return c;
+	   	  else
+	   	     return c;
+	   } else { 
+	      if (b > c) 
+	   	  	 return b;
+	   	  else if (c > b) 
+	   	     return c;
+	   	  else
+	   	     return c;
+	   } 
+}

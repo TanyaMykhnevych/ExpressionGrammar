@@ -1,0 +1,36 @@
+void main() {
+	float a = 5.2;
+	int c = 7;
+	float b = -0.3;
+	println(a + b * c / (a - 8));
+	
+	twoNumbersSum();
+	
+	println(fact(5));
+	
+	area();
+}
+
+void twoNumbersSum() {
+	int num1 = 5, num2 = 15, sum;
+	sum = num1 + num2;
+
+	println("Sum of these numbers: " + sum);
+}
+
+float area() {
+	 float length = 4.5;
+	 float width = 8.0;
+	 float area = length*width;
+	 println("Area of Rectangle is:"+area);
+}
+
+int fact(int n) {
+       int output;
+       if(n==1){
+         return 1;
+       }
+       # Recursion
+       output = fact(n-1)* n;
+       return output;
+}

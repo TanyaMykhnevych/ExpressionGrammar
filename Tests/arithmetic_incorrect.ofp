@@ -1,0 +1,14 @@
+void main() {
+	float a = .2; # wrong
+	int c = +7;  # wrong
+	float b = -1.;  # wrong
+	println(a + b * c / (a - 8));
+	twoNumbersSum();
+}
+
+void twoNumbersSum() {
+	int num1 = 5, num2 = 15, sum;
+	sum = num1 + num2;
+
+	println("Sum of these numbers: " + sum);
+}

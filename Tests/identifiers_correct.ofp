@@ -1,0 +1,6 @@
+void main() {
+	string s = "test string";
+	int A = 1;
+	float t = 10.5;
+	char c = 't';
+}

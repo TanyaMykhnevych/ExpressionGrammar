@@ -1,0 +1,3 @@
+void main() {
+	string[] arr = new string[10]; #wrong
+}

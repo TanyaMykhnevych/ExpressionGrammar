@@ -1,0 +1,8 @@
+void main() {
+	string s = "test string 1"; # wrong number
+	string str = ""; # wrong empty
+	
+	char c = '1'; # wrong number
+	char ch = ''; # wrong empty
+	char t = '%'; # wrong symbol
+}
