@@ -69,7 +69,8 @@ returnValue
     ;
 
 type
-    : primitiveType ('[' ']')*
+    : primitiveType
+    | arrayType  ('[' ']')*
     ;
 
 variableInitializer
