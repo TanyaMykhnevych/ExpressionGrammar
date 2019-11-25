@@ -8,7 +8,7 @@ grammar ExpressionGrammar;
 }
 
 
-start : methodDeclaration;
+start : (functionDeclaration)* mainFunctionDeclaration (functionDeclaration)*;
 
 // ------------------------- PARSER -------------------------
 primitiveType
@@ -31,15 +31,18 @@ literal
     | CHAR_LITERAL
     | STRING_LITERAL
     | BOOL_LITERAL
-    | NULL_LITERAL
     ;
 
-methodDeclaration
+functionDeclaration
     : returnValue IDENTIFIER params ('[' ']')*
-      methodBody
+      functionBody
+    ;
+    
+mainFunctionDeclaration
+    : 'void main()' functionBody
     ;
 
-methodBody
+functionBody
     : block
     | ';'
     ;
@@ -107,7 +110,7 @@ variableDeclarators
     : variableDeclarator (',' variableDeclarator)*
     ;
 
-methodCall
+functionCall
     : IDENTIFIER '(' expressionList? ')'
     ;
 
@@ -137,12 +140,9 @@ expression
     : '(' expression ')'
     | literal
     | IDENTIFIER
-    | expression DOT
-      ( IDENTIFIER
-      | methodCall     
-      )
+    | expression DOT IDENTIFIER
     | expression '[' expression ']'
-    | methodCall
+    | functionCall
     | NEW creator
     | '(' type ')' expression
     | (SUB) expression
@@ -195,9 +195,8 @@ MUL: '*';
 DIV: '/';
 
 // LITERALS
-NULL_LITERAL: 'null';
-INTEGER_LITERAL: ('0' | [1-9] (Digits?)) [lL]?;
-FLOAT_LITERAL: (Digits '.' Digits) [fFdD]?;
+INTEGER_LITERAL: ('0' | [1-9] (Digits?));
+FLOAT_LITERAL: (Digits '.' Digits);
 BOOL_LITERAL: 'true' | 'false';
 CHAR_LITERAL: '\'' [a-zA-Z !.,?=:()] '\'';
 STRING_LITERAL: '"' [a-zA-Z !.,?=:()]+ '"';
@@ -211,8 +210,8 @@ IDENTIFIER:         Letter Letter*;
 
 // FRAGMENTS
 fragment Digits
-    : [0-9] ([0-9_]* [0-9])?
+    : [0-9] ([0-9]* [0-9])?
     ;
 fragment Letter
-    : [a-zA-Z$_]
+    : [a-zA-Z]
     ;
