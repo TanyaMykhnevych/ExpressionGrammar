@@ -1,0 +1,17 @@
+void main(){
+    print(x);
+    print(1);
+    print('d');
+    print ("str");
+    print(1.2);
+    print(true);
+    print(false);
+    
+    print(x);
+    println(1);
+    println('d');
+    println("str");
+    println(1.2);
+    println(true);
+    println(false);
+}

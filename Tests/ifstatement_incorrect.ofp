@@ -1,0 +1,5 @@
+void main(){
+    if(true);
+    if(true) x;
+    if(x = 32);
+}

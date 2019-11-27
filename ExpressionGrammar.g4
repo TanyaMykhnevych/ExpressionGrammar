@@ -7,6 +7,11 @@ grammar ExpressionGrammar;
     package mykhnevych.a1;
 }
 
+// subrules 
+// as optional (?) 
+// and as zero-or-more (*)
+// or one-or-more (+)
+
 
 start : (functionDeclaration)* mainFunctionDeclaration (functionDeclaration)*;
 
@@ -34,13 +39,22 @@ literal
     ;
 
 functionDeclaration
-    : returnValue IDENTIFIER params ('[' ']')*
+    : returnValue IDENTIFIER params
       functionBody
     ;
     
 mainFunctionDeclaration
     : 'void main()' functionBody
     ;
+
+builtinFunctionCall
+    : builtinFunction '(' builtintFunctionArgument ')'
+    ;
+
+builtinFunction
+    : PRINT
+    | PRINT_LINE
+    ;    
 
 functionBody
     : block
@@ -70,7 +84,7 @@ returnValue
 
 type
     : primitiveType
-    | arrayType  ('[' ']')*
+    | arrayType '[]'
     ;
 
 variableInitializer
@@ -94,7 +108,7 @@ arrayCreator
     : '[' (']' ('[' ']')* arrayInitializer | expression ']' ('[' expression ']')* ('[' ']')*)
     ;
    
- block
+block
     : '{' blockStatement* '}'
     ;
 
@@ -124,18 +138,61 @@ expressionList
     ;
 
 conditionExpression
-    : '(' expression ')'
+    : '(' booleanExpression ')'
+    ;
+    
+booleanExpression
+    : functionCall
+    | expression (EQUAL | LT | GT) expression
+    | BOOL_LITERAL
+    | IDENTIFIER
     ;
 
+ifStatement 
+	: IF conditionExpression ifBody (ELSE ifBody)?;
+	
+ifBody
+	: ifStatement
+	| generalStatement SEMI
+	| '{' ((generalStatement | RETURN expression?)  SEMI)* '}'
+	| '{' ifStatement '}'
+	| RETURN expression? SEMI
+	;
+
+unarySubstract
+    : SUB (IDENTIFIER | INTEGER_LITERAL | FLOAT_LITERAL)
+    ;
+
+assignStatement 
+    : IDENTIFIER '=' expression
+    | arrayElementAssignStatement
+    ;
+
+
+// arr[i] = 2;
+arrayElementAssignStatement 
+    :  IDENTIFIER '[' expression ']' '=' expression
+    ;
+
+
 statement
+	: generalStatement
+	| SEMI
+	| RETURN expression? ';'
+    ;
+    
+// for if support
+generalStatement
     : block
-    | IF conditionExpression statement (ELSE statement)?
+    | ifStatement
     | WHILE conditionExpression statement
-    | RETURN expression? ';'
-    | SEMI
     | expression ';'
     | IDENTIFIER ':' statement
+    | builtinFunctionCall
+    | assignStatement
+    | variableDeclaration
     ;
+   
 
 expression
     : '(' expression ')'
@@ -151,11 +208,22 @@ expression
     | expression (ADD | SUB) expression
     | expression (GT | LT) expression
     | expression (EQUAL) expression
-    | <assoc=right> expression 
-      ASSIGN
-      expression
     ;
-
+    
+builtintFunctionArgument
+    : '(' expression ')'
+    | literal
+    | IDENTIFIER
+    | expression DOT IDENTIFIER
+    | expression '[' expression ']'
+    | functionCall
+    | '(' type ')' expression
+    | (SUB) expression
+    | expression (MUL | DIV) expression
+    | expression (ADD | SUB) expression
+    | expression (GT | LT) expression
+    | expression (EQUAL) expression
+    ;
 
 // ------------------------- LEXER -------------------------
 // TYPES
@@ -173,6 +241,10 @@ RETURN: 'return';
 WHILE: 'while';
 
 NEW: 'new';
+
+// Built-in functions
+PRINT      : 'print'  ;
+PRINT_LINE : 'println';
 
 // SEPARATORS
 LPAREN: '(';
