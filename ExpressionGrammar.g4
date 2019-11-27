@@ -279,7 +279,7 @@ WS: [ \t\r\n]+ -> skip ;
 COMMENT: '#' ~[\r\n]* -> skip;
 
 // IDENTIFIER
-IDENTIFIER:         Letter (Letter | Digits)*;
+IDENTIFIER:         Letter Letter*;
 
 // FRAGMENTS
 fragment Digits
