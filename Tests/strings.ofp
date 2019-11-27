@@ -47,7 +47,7 @@ void printArray(char[] arr) {
 		print(c);
 		i = i + 1;
 	}
-	println("");
+	println(" "); # was: println("");
 }
 
 # True if str contains both X and Y

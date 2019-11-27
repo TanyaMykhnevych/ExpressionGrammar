@@ -1,0 +1,43 @@
+void main(){
+    if(x) int y = 2;
+    if(x) y = 3;
+
+    if(isTrue()){
+        x = 4;
+    }
+
+    if(getInt() == getInt()){
+        print("dd");
+    }
+
+    if(getInt() > getInt()){
+        print("dd");
+    }
+
+    if(getInt() < getInt()){
+        print("dd");
+    }
+
+    if (contafins(str,'Y')  > contains(str,'Y')) 
+         return true;
+
+    if(true)
+        if(true)
+            println("true");
+
+    if(true)
+        print("true");
+    else
+        print("false");
+
+    if(true){
+        print("true");
+        int x = 2;
+        x = 2;
+    }
+    else{
+        print("fff");
+        int x = 2;
+        x = 2;
+    }
+}
