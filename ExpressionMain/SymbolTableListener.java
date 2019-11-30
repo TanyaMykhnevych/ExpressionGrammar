@@ -1,5 +1,7 @@
 package mykhnevych.a2;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class SymbolTableListener extends ExpressionGrammarBaseListener {
@@ -21,14 +23,35 @@ public class SymbolTableListener extends ExpressionGrammarBaseListener {
 	}
 
 	@Override
-	public void enterFunctionDeclaration(ExpressionGrammarParser.FunctionDeclarationContext ctx) {	
-		
+	public void enterFunctionDeclaration(ExpressionGrammarParser.FunctionDeclarationContext ctx) {
+
+	}
+
+	@Override
+	public void exitFunctionDeclaration(ExpressionGrammarParser.FunctionDeclarationContext ctx) {
 
 	}
 	
-	@Override
-	public void exitFunctionDeclaration(ExpressionGrammarParser.FunctionDeclarationContext ctx) {	
-		
+	@Override public void enterBlock(ExpressionGrammarParser.BlockContext ctx) {
+		enterScope(ctx);
+	}
+	
 
+	@Override public void exitBlock(ExpressionGrammarParser.BlockContext ctx) {
+		exitScope();
+	}
+
+	public void enterScope(ParserRuleContext ctx) {
+		BaseScope explicitScope = new BaseScope(currentScope);
+		currentScope = explicitScope;
+		saveScope(ctx, currentScope);
+	}
+
+	public void exitScope() {
+		currentScope = currentScope.getEnclosingScope();
+	}
+
+	private void saveScope(ParserRuleContext ctx, BaseScope s) {
+		scopes.put(ctx, s);
 	}
 }
