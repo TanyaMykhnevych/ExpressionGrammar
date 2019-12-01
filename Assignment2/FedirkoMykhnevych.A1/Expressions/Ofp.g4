@@ -7,7 +7,7 @@ grammar Ofp;
     package FedirkoMykhnevych.A2;
 }
 
-// subrules 
+// subrules  
 // as optional (?) 
 // and as zero-or-more (*)
 // or one-or-more (+)
@@ -15,7 +15,7 @@ grammar Ofp;
 
 start : (functionDeclaration)* mainFunctionDeclaration (functionDeclaration)*;
 
-// ------------------------- PARSER ------------------------
+// ------------------------- PARSER -------------------------
 primitiveType
     : BOOLEAN
     | CHAR
@@ -170,7 +170,7 @@ assignStatement
 
 
 // arr[i] = 2;
-arrayElementAssignStatement
+arrayElementAssignStatement 
     :  IDENTIFIER '[' expression ']' '=' expression
     ;
 

@@ -1,14 +1,17 @@
-package FedirkoMykhenvych.A1;
+package FedirkoMykhenvych.A2;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.antlr.v4.gui.Trees;
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import FedirkoMykhnevych.A2.OfpLexer;
-import FedirkoMykhnevych.A2.OfpParser;
+import FedirkoMykhnevych.A2.*;
 
 
 public class ExpressionsMain {
@@ -32,10 +35,14 @@ public class ExpressionsMain {
 		OfpLexer lexer = new OfpLexer(CharStreams.fromFileName(path));
 		OfpParser parser = new OfpParser(new BufferedTokenStream(lexer));		 
 		OfpParser.StartContext root = parser.start();
-
-		// Display tree
-		Trees.inspect(root, parser);
 		
+		Map<String, Function> declaredFunctions = new HashMap<String, Function>();
+		ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
+		
+		FunctionListener fl = new FunctionListener(declaredFunctions, scopes, parser);
+		
+		ParseTreeWalker walker = new ParseTreeWalker();	
+		walker.walk(fl, root);
 	}
 
 }
