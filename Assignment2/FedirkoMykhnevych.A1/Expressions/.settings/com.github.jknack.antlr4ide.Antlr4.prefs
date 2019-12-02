@@ -10,5 +10,5 @@ eclipse.preferences.version=1
 is_project_specific=
 outlet.DEFAULT_OUTPUT.cleanupDerived=true
 outlet.DEFAULT_OUTPUT.derived=true
-outlet.DEFAULT_OUTPUT.directory=./target/generated-sources/antlr4
+outlet.DEFAULT_OUTPUT.directory=./target/generated-sources/antlr4/FedirkoMykhnevych/A2
 

@@ -1,4 +1,4 @@
-package FedirkoMykhnevych.A2;
+package FedirkoMykhenvych.A2;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

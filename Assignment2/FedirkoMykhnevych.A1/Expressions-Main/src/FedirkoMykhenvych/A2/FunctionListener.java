@@ -1,9 +1,13 @@
-package FedirkoMykhnevych.A2;
+package FedirkoMykhenvych.A2;
 
 import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+
+import FedirkoMykhnevych.A2.OfpBaseListener;
+import FedirkoMykhnevych.A2.OfpParser;
+import FedirkoMykhnevych.A2.OfpParser.FunctionDeclarationContext;
 
 public class FunctionListener extends OfpBaseListener{
 	
