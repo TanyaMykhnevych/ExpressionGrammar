@@ -16,6 +16,8 @@ import FedirkoMykhnevych.A2.*;
 
 public class ExpressionsMain {
 
+	private static String inputFile = null;
+
 	public static void main(String[] args) throws Exception {
 		Path currentRelativePath = Paths.get("");
 		String s = currentRelativePath.toAbsolutePath().toString();
@@ -28,7 +30,7 @@ public class ExpressionsMain {
 	}
 	
 	public static void runFile(String path) throws Exception {
-		
+		inputFile = path;
 		System.out.println("Reading test program from: "+path);
 		
 		// Parse input program
@@ -44,5 +46,9 @@ public class ExpressionsMain {
 		ParseTreeWalker walker = new ParseTreeWalker();	
 		walker.walk(fl, root);
 	}
+	
+    public static String getFileName(){
+    	return inputFile;
+    }
 
 }

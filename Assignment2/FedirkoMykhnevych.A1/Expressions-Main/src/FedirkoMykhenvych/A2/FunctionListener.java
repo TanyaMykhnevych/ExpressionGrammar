@@ -34,7 +34,7 @@ public class FunctionListener extends OfpBaseListener {
 		currentScope = function;
 
 		if (declaredFunctions.containsKey(functionName))
-			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "function ", functionName,
+			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate function declaration: ", functionName,
 					currentScope.getScopeName());
 
 		saveScope(ctx, function);
@@ -52,7 +52,6 @@ public class FunctionListener extends OfpBaseListener {
 		}
 
 		mainWasDeclared = true;
-		// saveScope(ctx, function);
 	}
 
 	@Override

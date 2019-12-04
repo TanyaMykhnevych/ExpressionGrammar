@@ -1,5 +1,6 @@
 package FedirkoMykhenvych.A2;
 
+import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
@@ -22,7 +23,7 @@ public final class ErrorPrinter{
     
     public static void printFileNameAndLineNumber(Token offendingToken){
         reportError();
-        System.err.print("Main.getFileName()+: "+offendingToken.getLine()+": ");
+        System.err.print("\n" + ExpressionsMain.getFileName() + ": " +offendingToken.getLine()+": ");
 
     }
     
@@ -35,7 +36,7 @@ public final class ErrorPrinter{
     public static void underlineError(Recognizer recognizer, Token offendingToken) {
         int line = offendingToken.getLine();
         int charPositionInLine = offendingToken.getCharPositionInLine();
-        CommonTokenStream tokens = (CommonTokenStream)recognizer.getInputStream();
+        BufferedTokenStream tokens = (BufferedTokenStream)recognizer.getInputStream();
         String input = tokens.getTokenSource().getInputStream().toString();
         String[] lines = input.split("\n");
         String errorLine = lines[line - 1];
@@ -47,11 +48,7 @@ public final class ErrorPrinter{
                 System.err.print(" ");
             }
         }
-        int start = offendingToken.getStartIndex();
-        int stop = offendingToken.getStopIndex();
-        if ( start>=0 && stop>=0 ) {
-            for (int i=start; i<=stop; i++) System.err.print("^");
-        }
+
         System.err.println();
     }
 }
