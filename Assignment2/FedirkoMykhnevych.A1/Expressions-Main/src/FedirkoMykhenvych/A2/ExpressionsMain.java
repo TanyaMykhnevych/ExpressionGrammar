@@ -41,7 +41,7 @@ public class ExpressionsMain {
 		Map<String, Function> declaredFunctions = new HashMap<String, Function>();
 		ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
 
-		FunctionListener fl = new FunctionListener(declaredFunctions, scopes, parser);
+		SymbolTableListener fl = new SymbolTableListener(declaredFunctions, scopes, parser);
 
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(fl, root);

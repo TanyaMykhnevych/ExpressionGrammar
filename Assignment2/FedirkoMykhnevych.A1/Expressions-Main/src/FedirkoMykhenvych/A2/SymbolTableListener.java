@@ -10,7 +10,7 @@ import FedirkoMykhnevych.A2.OfpParser;
 import FedirkoMykhnevych.A2.OfpParser.FunctionDeclarationContext;
 import FedirkoMykhnevych.A2.OfpParser.ReturnValueContext;
 
-public class FunctionListener extends OfpBaseListener {
+public class SymbolTableListener extends OfpBaseListener {
 
 	OfpParser parser;
 
@@ -22,7 +22,7 @@ public class FunctionListener extends OfpBaseListener {
 	private boolean mainWasDeclared;
 	private int argCount;
 
-	public FunctionListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, OfpParser parser) {
+	public SymbolTableListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, OfpParser parser) {
 		this.declaredFunctions = functions;
 		this.scopes = scopes;
 		this.parser = parser;
