@@ -126,7 +126,7 @@ variableDeclarators
     ;
 
 functionCall
-    : IDENTIFIER '(' expressionList? ')'
+    : IDENTIFIER arguments
     ;
 
 arguments
