@@ -14,12 +14,13 @@ public class FunctionListener extends OfpBaseListener {
 	OfpParser parser;
 
 	final Map<String, Function> declaredFunctions;
-
 	ParseTreeProperty<Scope> scopes;
 
 	Scope currentScope = null;
+	
+	private boolean mainWasDeclared;
+	private int argCount;
 
-	boolean mainWasDeclared; // not sure if we need this
 
 	public FunctionListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, OfpParser parser) {
 		this.declaredFunctions = functions;
@@ -28,23 +29,42 @@ public class FunctionListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {		
 		String functionName = ctx.IDENTIFIER().getText();
 		Function function = new Function(functionName);
-		currentScope = function;
+		enterScope(ctx);
 
 		if (declaredFunctions.containsKey(functionName))
-			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate function declaration: ", functionName,
-					currentScope.getScopeName());
+			ErrorPrinter
+				.printFullError(parser, 
+						ctx.IDENTIFIER().getSymbol(), 
+						"Duplicate function declaration: ", 
+						functionName,
+						currentScope.getScopeName());
+		
+		
 
 		saveScope(ctx, function);
 	}
 
 	@Override
 	public void exitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
-		currentScope = currentScope.getEnclosingScope();
+		exitScope();
 	}
 
+	@Override
+	public void enterParamsList(OfpParser.ParamsListContext ctx) { 
+		argCount = 0;
+	}
+	
+	@Override
+	public void enterParam(OfpParser.ParamContext ctx) {
+		Symbol param = currentScope.resolve(ctx.IDENTIFIER().getText());
+		
+		
+	}
+	
+	
 	@Override
 	public void enterMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		if (mainWasDeclared) {
@@ -53,14 +73,17 @@ public class FunctionListener extends OfpBaseListener {
 
 		mainWasDeclared = true;
 	}
-
-	@Override
-	public void exitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
-
-	}
-
+	
 	private void saveScope(ParserRuleContext ctx, Function s) {
 		declaredFunctions.put(s.getScopeName(), s);
 		scopes.put(ctx, s);
+	}
+	
+	private void exitScope() {
+		currentScope = currentScope.getEnclosingScope();
+	}
+	
+	private void enterScope(ParserRuleContext ctx) {
+		currentScope = scopes.get(ctx);
 	}
 }
