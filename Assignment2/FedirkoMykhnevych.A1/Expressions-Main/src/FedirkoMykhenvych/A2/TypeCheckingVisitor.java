@@ -28,57 +28,35 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 
 	@Override
 	public OFPType visitConditionExpression(OfpParser.ConditionExpressionContext ctx) {
-		OFPType t = visit(ctx.getChild(2));
+		// OFPType t = visit(ctx.getChild(2));
+		return visitChildren(ctx);
+	}
+
+	@Override
+	public OFPType visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		return visitChildren(ctx);
 	}
 
 	@Override
 	public OFPType visitParamsList(OfpParser.ParamsListContext ctx) {
-		FunctionCallContext parent = (FunctionCallContext) ctx.getParent();
-		String fName = parent.getChild(0).getText();
-		Function fSymbol = (Function) globalScope.resolve(fName);
-
-		List<OFPType> pTypes = fSymbol.getParamTypes();
-
-		List<OFPType> argTypes = new ArrayList<OFPType>();
-		for (int i = 0; i < ctx.getChildCount(); i += 2) { // +2 because of commas
-			OFPType argType = visit(ctx.getChild(i));
-			argTypes.add(argType);
-		}
-
-		// Compare number of args vs parameters
-		String eMsg = errorCount + "\tParam/arg mismatch in call to function " + fName + " in function "
-				+ currentFunction.getName();
-		if (argTypes.size() != pTypes.size()) { // Error
-			errorCount++;
-			System.out.println(eMsg);
-			return null;
-		}
-
-		// Compare arg types
-		for (int i = 0; i < pTypes.size(); i++) {
-			OFPType pType = pTypes.get(i);
-			OFPType aType = argTypes.get(i);
-			if (pType == aType)
-				; // OK
-			else { // Error
-				errorCount++;
-				System.out.println(eMsg);
-				return null;
-			}
-		}
-		return null;
+		return visitChildren(ctx);
 	}
 
 	@Override
 	public OFPType visitStart(OfpParser.StartContext ctx) {
 		globalScope = currentScope;
-		return null;
+		return visitChildren(ctx);
 	}
 
 	@Override
 	public OFPType visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
 		currentFunction = (Function) currentScope;
-		return null;
+		return visitChildren(ctx);
+	}
+
+	@Override
+	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx) {
+		OFPType type = visit(ctx.expressionList().getChild(0));
+		return visitChildren(ctx);
 	}
 }
