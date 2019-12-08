@@ -1,11 +1,13 @@
-package FedirkoMykhenvych.A2; 
+package FedirkoMykhenvych.A2;
 
 public interface Scope {
-    public String getScopeName();
+	public String getScopeName();
 
-    public Scope getEnclosingScope();
+	public Scope getEnclosingScope();
 
-    public void define(Symbol sym);
+	void initialize(Symbol sym);
 
-    public Symbol resolve(String name);
+	public void define(Symbol sym);
+
+	public Symbol resolve(String name);
 }
