@@ -185,13 +185,16 @@ statement
 generalStatement
     : block
     | ifStatement
-    | WHILE conditionExpression statement
+    | whileStatement
     | expression ';'
     | IDENTIFIER ':' statement
     | builtinFunctionCall
     | assignStatement
     | variableDeclaration
     ;
+    
+whileStatement
+	: WHILE conditionExpression statement;
    
 
 expression

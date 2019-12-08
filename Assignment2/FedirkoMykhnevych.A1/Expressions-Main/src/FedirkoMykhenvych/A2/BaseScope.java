@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BaseScope implements Scope {
-	private BaseScope enclosingScope;
+	private Scope enclosingScope;
 	private Map<String, Symbol> symbols = new LinkedHashMap<String, Symbol>();
 
-	public BaseScope(BaseScope enclosingScope) {
+	public BaseScope(Scope enclosingScope) {
 		this.enclosingScope = enclosingScope;
 	}
 
-	public BaseScope getEnclosingScope() {
+	public Scope getEnclosingScope() {
 		return enclosingScope;
 	}
 
@@ -25,7 +25,7 @@ public class BaseScope implements Scope {
 			return s;
 		}
 
-		BaseScope parent = getEnclosingScope();
+		Scope parent = getEnclosingScope();
 		if (parent != null)
 			return parent.resolve(name);
 		return null;
@@ -36,9 +36,15 @@ public class BaseScope implements Scope {
 		return symbols.keySet().toString();
 	}
 
-	@Override
+	//@Override
 	public String getScopeName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void initialize(Symbol sym) {
+		// TODO Auto-generated method stub
+		
 	}
 }

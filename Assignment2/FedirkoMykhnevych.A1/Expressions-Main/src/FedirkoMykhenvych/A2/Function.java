@@ -53,7 +53,6 @@ public class Function extends Symbol implements Scope {
 
 	@Override
 	public String getScopeName() {
-		// TODO Auto-generated method stub
 		return name;
 	}
 
