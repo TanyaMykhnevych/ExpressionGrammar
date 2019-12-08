@@ -9,6 +9,7 @@ public class OFPType {
 	public static final OFPType floatArrType = new OFPType("float[]");
 	public static final OFPType boolType = new OFPType("bool");
 	public static final OFPType stringType = new OFPType("string");
+	public static final OFPType voidType = new OFPType("void");
 	public static final OFPType undefinedType = new OFPType("");
 
 	public static OFPType getTypeFor(String typeName) {
