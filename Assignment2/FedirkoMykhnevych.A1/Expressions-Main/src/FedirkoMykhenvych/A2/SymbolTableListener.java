@@ -26,7 +26,8 @@ public class SymbolTableListener extends OfpBaseListener {
 	private boolean mainWasDeclared;
 	private int argCount;
 
-	public SymbolTableListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, OfpParser parser) {
+	public SymbolTableListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes,
+			OfpParser parser) {
 		this.declaredFunctions = functions;
 		this.scopes = scopes;
 		this.parser = parser;
@@ -38,22 +39,29 @@ public class SymbolTableListener extends OfpBaseListener {
 		ReturnValueContext returnCtx = ctx.returnValue();
 		OFPType returnType = returnCtx == null ? OFPType.voidType : OFPType.getTypeFor(returnCtx.getText());
 		Function function = new Function(functionName, returnType);
-	
 
 		saveScope(ctx, function);
 		enterScope(ctx);
 
 		if (declaredFunctions.containsKey(functionName))
-			ErrorPrinter
-				.printFullError(parser, 
-						ctx.IDENTIFIER().getSymbol(), 
-						"Duplicate function declaration: ", 
-						functionName,
-						currentScope.getScopeName());
+			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate function declaration: ",
+					functionName, currentScope.getScopeName());
 	}
 
 	@Override
 	public void exitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		exitScope();
+	}
+
+	@Override
+	public void enterBlock(OfpParser.BlockContext ctx) {
+		Scope s = new BaseScope(currentScope);
+		scopes.put(ctx, s);
+		enterScope(ctx);
+	}
+
+	@Override
+	public void exitBlock(OfpParser.BlockContext ctx) {
 		exitScope();
 	}
 
@@ -68,18 +76,17 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		OFPType paramType = OFPType.getTypeFor(ctx.type().getText());
 		String paramIdentifier = ctx.IDENTIFIER().getText();
-		
-		if(currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
-			ErrorPrinter
+
+		if (currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
+				ErrorPrinter
 				.printFullError(parser, 
 					ctx.IDENTIFIER().getSymbol(), 
 					"Duplicate param declaration: ", 
 					paramIdentifier,
-					currentScope.getScopeName());		
-			
+					currentScope.getScopeName());
 		Symbol param = new Symbol(paramIdentifier, paramType);
-		param.setScope(currentScope);	
-		currFunc.addParam(param);		
+		param.setScope(currentScope);
+		currFunc.addParam(param);
 		argCount++;
 	}
 
@@ -91,42 +98,35 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		mainWasDeclared = true;
 		Scope declarationScope = new BaseScope(currentScope);
-		currentScope = declarationScope;	
+		currentScope = declarationScope;
 	}
-	
+
 	@Override
 	public void exitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		exitScope();
 	}
 
-	
-	@Override 
+	@Override
 	public void enterWhileStatement(OfpParser.WhileStatementContext ctx) {
-		Scope whileScope = new BaseScope(currentScope);		
+		Scope whileScope = new BaseScope(currentScope);
 		currentScope = whileScope;
 	}
-	
-	@Override public void exitWhileStatement(OfpParser.WhileStatementContext ctx) {
+
+	@Override
+	public void exitWhileStatement(OfpParser.WhileStatementContext ctx) {
 		exitScope();
 	}
-	
-	@Override 
+
+	@Override
 	public void enterVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
 		Scope declarationScope = new BaseScope(currentScope);
-		currentScope = declarationScope;		
+		currentScope = declarationScope;
 	}
 
-	@Override public void exitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
-		
+	@Override
+	public void exitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
+
 		OFPType type = OFPType.getTypeFor(ctx.type().getText());
-		
-		List<Symbol> symbols = ctx
-				.variableDeclarators()
-				.variableDeclarator()
-				.stream()
-				.map(x -> new Symbol(x.IDENTIFIER().getText(), type))
-				.collect(Collectors.toList());
-		
 
 		for(Symbol s : symbols) {
 			if(currentScope.resolve(s.getName()) != null)
@@ -135,15 +135,14 @@ public class SymbolTableListener extends OfpBaseListener {
 						null, 
 						"Duplicate variable declaration: ", 
 						s.getName(),
-						currentScope.getScopeName());		
+						currentScope.getScopeName());;
 			else
 				currentScope.define(s);
 		}
-		
+
 		exitScope();
 	}
-	
-	
+
 	private void saveScope(ParserRuleContext ctx, Function s) {
 		declaredFunctions.put(s.getScopeName(), s);
 		scopes.put(ctx, s);
