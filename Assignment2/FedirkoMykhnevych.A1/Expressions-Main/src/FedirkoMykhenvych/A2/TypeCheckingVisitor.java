@@ -14,7 +14,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 
 	private final ParseTreeProperty<Scope> scopes;
 	private Scope currentScope;
-	private Scope globalScope;
 	private Function currentFunction; // For logging purposes
 	int errorCount = 0; // Keep track of the total number of errors
 	final Map<String, Function> declaredFunctions;
@@ -36,7 +35,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	@Override
 	public OFPType visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		currentFunction = (Function) currentScope;
-		globalScope = currentScope;
 		enterScope(ctx);
 		return visitChildren(ctx);
 	}
@@ -49,7 +47,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	@Override
 	public OFPType visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
 		currentFunction = (Function) currentScope;
-		globalScope = currentScope;
 		enterScope(ctx);
 		return visitChildren(ctx);
 	}
@@ -58,6 +55,11 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx) {
 		String fName = ctx.getChild(0).getText();
 		Function fSymbol = declaredFunctions.get(fName);
+
+		if (fSymbol == null) {
+			errorCount++;
+			return visitChildren(ctx);
+		}
 
 		List<OFPType> pTypes = fSymbol.getParamTypes();
 

@@ -1,46 +1,59 @@
 package FedirkoMykhenvych.A2;
 
-import org.antlr.v4.runtime.ParserRuleContext;
+import java.util.Map;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
-public class CheckRefListener {
+import FedirkoMykhnevych.A2.OfpBaseListener;
+import FedirkoMykhnevych.A2.OfpParser;
+
+public class CheckRefListener extends OfpBaseListener {
 	private ParseTreeProperty<Scope> scopes; // node-to-scope mapping
 	private Scope currentScope;
-	private Scope globalScope; // used to resolve function symbols
+	final Map<String, Function> declaredFunctions;
 
-	private String currentFunction; // For logging purposes
+	private String currentFunction;
 	int errorCount = 0; // Keep track of the total number of errors
 
-	public CheckRefListener(ParseTreeProperty<Scope> scopes) {
+	public CheckRefListener(Map<String, Function> functions, ParseTreeProperty<Scope> scopes) {
 		this.scopes = scopes;
+		this.declaredFunctions = functions;
 	}
 
 	public int getErrorCount() {
 		return errorCount;
 	}
 
-	private void enterScope(ParserRuleContext ctx) {
-		currentScope = scopes.get(ctx);
-		if (currentScope == null)
-			throw new RuntimeException("No current scope in enterScope!");
-	}
-
-	private void exitScope() {
-	}
-
-	/*@Override
-	public void enterProgram(OfpParser.ProgramContext ctx) {
-		enterScope(ctx);
-		globalScope = currentScope; // Save the ref. to the global/program scope
+	@Override
+	public void enterMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
+		currentFunction = "main";
 	}
 
 	@Override
-	public void enterCall(OfpParser.CallContext ctx) {
+	public void exitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
+	}
+
+	@Override
+	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		currentFunction = ctx.IDENTIFIER().getText();
+	}
+
+	@Override
+	public void enterVariableDeclarator(OfpParser.VariableDeclaratorContext ctx) {
+		 // TODO: Check use of undeclared variables
+	}
+
+	@Override
+	public void enterFunctionCall(OfpParser.FunctionCallContext ctx) {
 		String name = ctx.getChild(0).getText();
-		Symbol sym = globalScope.resolve(name);
-		if (sym == null || !(sym instanceof FunctionSymbol)) {
+		Symbol sym = declaredFunctions.get(name);
+		if (sym == null || !(sym instanceof Function)) {
 			errorCount++;
-			System.out.println(errorCount + "\tUndeclared function call in function " + currentFunction + ": " + name);
+			System.out.println(errorCount + "\nUndeclared function call in function " + currentFunction + ": " + name);
 		}
-	}*/
+	}
+
+	@Override
+	public void exitFunctionCall(OfpParser.FunctionCallContext ctx) {
+
+	}
 }

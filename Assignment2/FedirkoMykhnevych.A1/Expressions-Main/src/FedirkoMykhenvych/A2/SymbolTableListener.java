@@ -99,6 +99,8 @@ public class SymbolTableListener extends OfpBaseListener {
 		currentScope = declarationScope;
 		Function mainFunction = new Function("main", OFPType.voidType);
 		saveScope(ctx, mainFunction);
+		enterScope(ctx);
+		declaredFunctions.put("main", mainFunction);
 	}
 
 	@Override

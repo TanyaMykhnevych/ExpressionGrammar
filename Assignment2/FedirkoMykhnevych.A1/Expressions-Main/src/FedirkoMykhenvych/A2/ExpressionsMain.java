@@ -42,9 +42,11 @@ public class ExpressionsMain {
 		ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
 
 		SymbolTableListener fl = new SymbolTableListener(declaredFunctions, scopes, parser);
-
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(fl, root);
+
+		CheckRefListener rl = new CheckRefListener(declaredFunctions, scopes);
+		walker.walk(rl, root);
 
 		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions, scopes, parser);
 		typeChecker.visit(root);
