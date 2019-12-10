@@ -128,6 +128,13 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		OFPType type = OFPType.getTypeFor(ctx.type().getText());
 
+		List<Symbol> symbols = ctx
+				.variableDeclarators()
+				.variableDeclarator()
+				.stream()
+				.map(x -> new Symbol(x.IDENTIFIER().getText(), type))
+				.collect(Collectors.toList());
+		
 		for(Symbol s : symbols) {
 			if(currentScope.resolve(s.getName()) != null)
 				ErrorPrinter
@@ -135,7 +142,7 @@ public class SymbolTableListener extends OfpBaseListener {
 						null, 
 						"Duplicate variable declaration: ", 
 						s.getName(),
-						currentScope.getScopeName());;
+						currentScope.getScopeName());
 			else
 				currentScope.define(s);
 		}
