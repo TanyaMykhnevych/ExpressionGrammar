@@ -46,7 +46,7 @@ public class ExpressionsMain {
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(fl, root);
 
-		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(scopes, parser);
+		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions, scopes, parser);
 		typeChecker.visit(root);
 	}
 

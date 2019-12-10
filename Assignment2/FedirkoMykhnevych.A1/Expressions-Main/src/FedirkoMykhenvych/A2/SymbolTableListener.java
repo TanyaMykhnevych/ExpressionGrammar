@@ -46,6 +46,8 @@ public class SymbolTableListener extends OfpBaseListener {
 		if (declaredFunctions.containsKey(functionName))
 			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate function declaration: ",
 					functionName, currentScope.getScopeName());
+
+		declaredFunctions.put(functionName, function);
 	}
 
 	@Override
@@ -78,12 +80,8 @@ public class SymbolTableListener extends OfpBaseListener {
 		String paramIdentifier = ctx.IDENTIFIER().getText();
 
 		if (currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
-				ErrorPrinter
-				.printFullError(parser, 
-					ctx.IDENTIFIER().getSymbol(), 
-					"Duplicate param declaration: ", 
-					paramIdentifier,
-					currentScope.getScopeName());
+			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate param declaration: ",
+					paramIdentifier, currentScope.getScopeName());
 		Symbol param = new Symbol(paramIdentifier, paramType);
 		param.setScope(currentScope);
 		currFunc.addParam(param);
@@ -99,6 +97,8 @@ public class SymbolTableListener extends OfpBaseListener {
 		mainWasDeclared = true;
 		Scope declarationScope = new BaseScope(currentScope);
 		currentScope = declarationScope;
+		Function mainFunction = new Function("main", OFPType.voidType);
+		saveScope(ctx, mainFunction);
 	}
 
 	@Override
@@ -128,20 +128,12 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		OFPType type = OFPType.getTypeFor(ctx.type().getText());
 
-		List<Symbol> symbols = ctx
-				.variableDeclarators()
-				.variableDeclarator()
-				.stream()
-				.map(x -> new Symbol(x.IDENTIFIER().getText(), type))
-				.collect(Collectors.toList());
-		
-		for(Symbol s : symbols) {
-			if(currentScope.resolve(s.getName()) != null)
-				ErrorPrinter
-					.printFullError(parser, 
-						null, 
-						"Duplicate variable declaration: ", 
-						s.getName(),
+		List<Symbol> symbols = ctx.variableDeclarators().variableDeclarator().stream()
+				.map(x -> new Symbol(x.IDENTIFIER().getText(), type)).collect(Collectors.toList());
+
+		for (Symbol s : symbols) {
+			if (currentScope.resolve(s.getName()) != null)
+				ErrorPrinter.printFullError(parser, null, "Duplicate variable declaration: ", s.getName(),
 						currentScope.getScopeName());
 			else
 				currentScope.define(s);
