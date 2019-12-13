@@ -199,18 +199,31 @@ whileStatement
 
 expression
     : '(' expression ')'
+    # bracketsExpression
     | literal
+    # literalExpression
     | IDENTIFIER
+    # identifierExpression
     | expression DOT IDENTIFIER
+    # memberExpression
     | expression '[' expression ']'
+    # arrayIndexExpression
     | functionCall
+    # functionCallExpression
     | NEW creator
+    # newCreatorExpression
     | '(' type ')' expression
+    # typeExpression
     | (SUB) expression
+    # unaryMinusExpression
     | expression (MUL | DIV) expression
+    # mulDivExpression
     | expression (ADD | SUB) expression
+    # addSubExpression
     | expression (GT | LT) expression
+    # gtLtExpression
     | expression (EQUAL) expression
+    # assigmentExpression
     ;
     
 builtintFunctionArgument

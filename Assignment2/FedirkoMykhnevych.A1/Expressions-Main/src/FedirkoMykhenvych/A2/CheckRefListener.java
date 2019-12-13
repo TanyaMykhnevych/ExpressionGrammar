@@ -1,6 +1,8 @@
 package FedirkoMykhenvych.A2;
 
 import java.util.Map;
+
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import FedirkoMykhnevych.A2.OfpBaseListener;
@@ -38,8 +40,15 @@ public class CheckRefListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterVariableDeclarator(OfpParser.VariableDeclaratorContext ctx) {
-		 // TODO: Check use of undeclared variables
+	public void enterIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) {
+		String identifier = ctx.IDENTIFIER().getText();
+		Function function = declaredFunctions.get(currentFunction);
+		Symbol usedSymbol = function.resolve(identifier);
+        if(usedSymbol == null){
+            // ErrorPrinter.printVariableMayNotHaveBeenInitializedError(parser, ctx.IDENTIFIER().getSymbol(), identifier);
+			errorCount++;
+			System.out.println(errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
+        }
 	}
 
 	@Override
