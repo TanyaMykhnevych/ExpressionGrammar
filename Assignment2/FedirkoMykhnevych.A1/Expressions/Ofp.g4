@@ -148,8 +148,11 @@ booleanExpression
     | IDENTIFIER
     ;
 
+elseStatement
+	: ELSE ifBody;
+
 ifStatement 
-	: IF conditionExpression ifBody (ELSE ifBody)?;
+	: IF conditionExpression ifBody elseStatement?;
 	
 ifBody
 	: ifStatement

@@ -50,6 +50,18 @@ public class CheckRefListener extends OfpBaseListener {
 			System.out.println(errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
         }
 	}
+	
+	@Override 
+	public void enterAssignStatement(OfpParser.AssignStatementContext ctx) {
+		String identifier = ctx.IDENTIFIER().getText();
+		Function function = declaredFunctions.get(currentFunction);
+		Symbol usedSymbol = function.resolve(identifier);
+		
+        if(usedSymbol == null){
+			errorCount++;
+			System.out.println(errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
+        }
+	}
 
 	@Override
 	public void enterFunctionCall(OfpParser.FunctionCallContext ctx) {

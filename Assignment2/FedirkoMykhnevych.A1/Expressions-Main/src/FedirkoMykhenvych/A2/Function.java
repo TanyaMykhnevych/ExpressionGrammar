@@ -18,6 +18,7 @@ public class Function extends Symbol implements Scope {
 
 	public Function(String name, OFPType returnType) {
 		super(name, returnType);
+		this.name = name;
 	}
 
 	@Override

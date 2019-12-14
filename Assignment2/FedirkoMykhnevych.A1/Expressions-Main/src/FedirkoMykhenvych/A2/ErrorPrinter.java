@@ -18,7 +18,7 @@ public final class ErrorPrinter{
         System.err.println(message);
         ErrorPrinter.underlineError(recognizer, offendingToken);
         System.err.println("  " + symbol);
-        System.err.println("  " + location);
+        System.err.println("  in " + location + "()");
     }
     
     public static void printFileNameAndLineNumber(Token offendingToken){

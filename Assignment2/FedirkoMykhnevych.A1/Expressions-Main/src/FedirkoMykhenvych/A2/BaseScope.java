@@ -39,7 +39,7 @@ public class BaseScope implements Scope {
 	//@Override
 	public String getScopeName() {
 		// TODO Auto-generated method stub
-		return null;
+		return enclosingScope.getScopeName();
 	}
 
 	@Override

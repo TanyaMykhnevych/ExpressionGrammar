@@ -7,7 +7,9 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import FedirkoMykhnevych.A2.OfpBaseListener;
 import FedirkoMykhnevych.A2.OfpParser;
@@ -24,9 +26,10 @@ public class SymbolTableListener extends OfpBaseListener {
 	Scope currentScope = null;
 
 	private boolean mainWasDeclared;
-	private int argCount;
 
-	public SymbolTableListener(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes,
+	public SymbolTableListener(
+			final Map<String, Function> functions, 
+			ParseTreeProperty<Scope> scopes,
 			OfpParser parser) {
 		this.declaredFunctions = functions;
 		this.scopes = scopes;
@@ -41,13 +44,13 @@ public class SymbolTableListener extends OfpBaseListener {
 		Function function = new Function(functionName, returnType);
 
 		saveScope(ctx, function);
-		enterScope(ctx);
 
 		if (declaredFunctions.containsKey(functionName))
 			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate function declaration: ",
 					functionName, currentScope.getScopeName());
 
 		declaredFunctions.put(functionName, function);
+		enterScope(function);
 	}
 
 	@Override
@@ -56,20 +59,13 @@ public class SymbolTableListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterBlock(OfpParser.BlockContext ctx) {
-		Scope s = new BaseScope(currentScope);
-		scopes.put(ctx, s);
-		enterScope(ctx);
-	}
-
+	public void enterBlock(OfpParser.BlockContext ctx) { }
 	@Override
-	public void exitBlock(OfpParser.BlockContext ctx) {
-		exitScope();
-	}
+	public void exitBlock(OfpParser.BlockContext ctx) {	}
 
 	@Override
 	public void enterParamsList(OfpParser.ParamsListContext ctx) {
-		argCount = 0;
+		
 	}
 
 	@Override
@@ -82,10 +78,10 @@ public class SymbolTableListener extends OfpBaseListener {
 		if (currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
 			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate param declaration: ",
 					paramIdentifier, currentScope.getScopeName());
+		
 		Symbol param = new Symbol(paramIdentifier, paramType);
 		param.setScope(currentScope);
 		currFunc.addParam(param);
-		argCount++;
 	}
 
 	@Override
@@ -95,11 +91,9 @@ public class SymbolTableListener extends OfpBaseListener {
 		}
 
 		mainWasDeclared = true;
-		Scope declarationScope = new BaseScope(currentScope);
-		currentScope = declarationScope;
 		Function mainFunction = new Function("main", OFPType.voidType);
 		saveScope(ctx, mainFunction);
-		enterScope(ctx);
+		enterScope(mainFunction);
 		declaredFunctions.put("main", mainFunction);
 	}
 
@@ -108,10 +102,23 @@ public class SymbolTableListener extends OfpBaseListener {
 		exitScope();
 	}
 
+	@Override 
+	public void enterIfStatement(OfpParser.IfStatementContext ctx) {
+		Scope ifScope = new BaseScope(currentScope);
+		saveScope(ctx, ifScope);
+		enterScope(ifScope);
+	}
+
+	@Override 
+	public void exitIfStatement(OfpParser.IfStatementContext ctx) {
+		exitScope();
+	}
+	
 	@Override
-	public void enterWhileStatement(OfpParser.WhileStatementContext ctx) {
+	public void enterWhileStatement(OfpParser.WhileStatementContext ctx) {		
 		Scope whileScope = new BaseScope(currentScope);
-		currentScope = whileScope;
+		saveScope(ctx, whileScope);
+		enterScope(whileScope);
 	}
 
 	@Override
@@ -121,39 +128,43 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void enterVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
-		Scope declarationScope = new BaseScope(currentScope);
-		currentScope = declarationScope;
-	}
-
-	@Override
-	public void exitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
 
 		OFPType type = OFPType.getTypeFor(ctx.type().getText());
 
-		List<Symbol> symbols = ctx.variableDeclarators().variableDeclarator().stream()
-				.map(x -> new Symbol(x.IDENTIFIER().getText(), type)).collect(Collectors.toList());
-
-		for (Symbol s : symbols) {
+		List<TerminalNode> identifiers = ctx
+				.variableDeclarators()
+				.variableDeclarator()
+				.stream()
+				.map(x -> x.IDENTIFIER())
+				.collect(Collectors.toList());
+		
+		for (TerminalNode tn : identifiers) {			
+			Symbol s = new Symbol(tn.getText(), type);
+			
 			if (currentScope.resolve(s.getName()) != null)
-				ErrorPrinter.printFullError(parser, null, "Duplicate variable declaration: ", s.getName(),
-						currentScope.getScopeName());
+				ErrorPrinter
+					.printFullError(
+							parser, tn.getSymbol(), "Duplicate variable declaration: ",
+							s.getName(), currentScope.getScopeName());
 			else
 				currentScope.define(s);
 		}
-
-		exitScope();
 	}
+	
 
-	private void saveScope(ParserRuleContext ctx, Function s) {
-		declaredFunctions.put(s.getScopeName(), s);
-		scopes.put(ctx, s);
-	}
+	@Override
+	public void exitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {	}
 
 	private void exitScope() {
 		currentScope = currentScope.getEnclosingScope();
-	}
+	}	
 
-	private void enterScope(ParserRuleContext ctx) {
-		currentScope = scopes.get(ctx);
+	private void enterScope(Scope scope) {
+		currentScope = scope;
+	}
+	
+	
+	private void saveScope(ParserRuleContext ctx, Scope s) {
+		scopes.put(ctx, s);
 	}
 }
