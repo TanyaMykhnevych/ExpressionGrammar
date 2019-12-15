@@ -1,0 +1,9 @@
+void main(){
+    int[] arr = new int[2];
+
+    bool eq = arr > 1;
+
+    if(arr == 3){
+        print('c');
+    }
+}

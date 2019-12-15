@@ -32,6 +32,11 @@ public final class ErrorPrinter{
         System.err.println("error: " + symbolType + " " + symbol + " already defined");
         ErrorPrinter.underlineError(recognizer, offendingToken);
     }
+        
+    public static void printRawString(String text) {
+    	System.err.println();
+    	System.err.println(text);
+    }
     
     public static void underlineError(Recognizer recognizer, Token offendingToken) {
         int line = offendingToken.getLine();

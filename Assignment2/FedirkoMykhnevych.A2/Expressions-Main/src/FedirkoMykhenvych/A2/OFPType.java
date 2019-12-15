@@ -37,10 +37,29 @@ public class OFPType {
 
 	private final String name;
 
+	public boolean IsNumberType() {
+		return this.equals(intType)
+			|| this.equals(floatType);
+	}
+	
+	public boolean IsArrayType() {
+		return this.equals(intArrType)
+			|| this.equals(charArrType)
+			|| this.equals(floatArrType);
+	}
+	
 	private OFPType(String name) {
 		this.name = name;
 	}
 
+	public OFPType FromArrayToPrimitive() {
+		return new OFPType(this.name.replace("[]", ""));
+	}
+
+	public boolean equals(OFPType type) {
+		return this.getName().contentEquals(type.getName());
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -49,5 +68,4 @@ public class OFPType {
 	public String toString() {
 		return name;
 	}
-
 }

@@ -15,7 +15,7 @@ grammar Ofp;
 
 start : (functionDeclaration)* mainFunctionDeclaration (functionDeclaration)*;
 
-// ------------------------- PARSER -------------------------
+// ------------------------- PARSER -----------------------
 primitiveType
     : BOOLEAN
     | CHAR
@@ -152,13 +152,13 @@ booleanExpression
     | expression (LT | GT) expression
     # gtLtBooleanExpression
     | expression (EQUAL) expression
-    # compareBooleanExpression
+    # booleanEqualsExpression
     | BOOL_LITERAL
     # booleanLiteralExpression
     | IDENTIFIER
     # identifierBooleanExpression
     ;
-
+    
 elseStatement
 	: ELSE ifBody;
 
@@ -192,8 +192,11 @@ arrayElementAssignStatement
 statement
 	: generalStatement
 	| SEMI
-	| RETURN expression? ';'
+	| returnStatement
     ;
+    
+returnStatement 
+	: RETURN expression? ';';
     
 // for if support
 generalStatement
@@ -223,9 +226,7 @@ expression
     | expression '[' expression ']'
     # arrayIndexExpression
     | functionCall
-    # functionCallExpression
-    | NEW creator
-    # newCreatorExpression
+    # functionCallExpression    
     | '(' type ')' expression
     # typeExpression
     | (SUB) expression
@@ -237,22 +238,17 @@ expression
     | expression (GT | LT) expression
     # gtLtExpression
     | expression (EQUAL) expression
-    # compareExpression
+    # equalsExpression
+    | NEW creator
+    # newCreatorExpression
     ;
-    
+
+arrayIndexExpr 
+	: expression '[' expression ']'
+	;
+
 builtintFunctionArgument
-    : '(' expression ')'
-    | literal
-    | IDENTIFIER
-    | expression DOT IDENTIFIER
-    | expression '[' expression ']'
-    | functionCall
-    | '(' type ')' expression
-    | (SUB) expression
-    | expression (MUL | DIV) expression
-    | expression (ADD | SUB) expression
-    | expression (GT | LT) expression
-    | expression (EQUAL) expression
+    : expression
     ;
 
 // ------------------------- LEXER -------------------------
