@@ -1,0 +1,4 @@
+void main(){
+    int y = 1;
+    int x = y[1];
+}

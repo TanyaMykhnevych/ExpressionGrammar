@@ -1,0 +1,8 @@
+
+void main() {
+	int[] arr = new int[2];
+	int x = arr[1];
+	string s = "Hello, Walt!";
+	print(s[0]);
+}
+
