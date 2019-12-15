@@ -2,14 +2,15 @@ package FedirkoMykhenvych.A2;
 
 import java.util.Map;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import FedirkoMykhnevych.A2.OfpBaseListener;
 import FedirkoMykhnevych.A2.OfpParser;
 
 public class CheckRefListener extends OfpBaseListener {
-	private ParseTreeProperty<Scope> scopes; // node-to-scope mapping
+	private ParseTreeProperty<Scope> scopes;
 	private Scope currentScope;
 	final Map<String, Function> declaredFunctions;
 
@@ -26,41 +27,60 @@ public class CheckRefListener extends OfpBaseListener {
 	}
 
 	@Override
+	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		currentFunction = ctx.IDENTIFIER().getText();
+		enterScope(ctx);
+	}
+
+	@Override
+	public void exitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		exitScope();
+	}
+
+	@Override
+	public void enterIfStatement(OfpParser.IfStatementContext ctx) {
+		enterScope(ctx);
+	}
+
+	@Override
+	public void exitIfStatement(OfpParser.IfStatementContext ctx) {
+		exitScope();
+	}
+
+	@Override
+	public void enterWhileStatement(OfpParser.WhileStatementContext ctx) {
+		enterScope(ctx);
+	}
+
+	@Override
+	public void exitWhileStatement(OfpParser.WhileStatementContext ctx) {
+		exitScope();
+	}
+
+	@Override
 	public void enterMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		currentFunction = "main";
+		enterScope(ctx);
 	}
 
 	@Override
 	public void exitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
-	}
-
-	@Override
-	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
-		currentFunction = ctx.IDENTIFIER().getText();
+		exitScope();
 	}
 
 	@Override
 	public void enterIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) {
 		String identifier = ctx.IDENTIFIER().getText();
-		Function function = declaredFunctions.get(currentFunction);
-		Symbol usedSymbol = function.resolve(identifier);
-        if(usedSymbol == null){
-            // ErrorPrinter.printVariableMayNotHaveBeenInitializedError(parser, ctx.IDENTIFIER().getSymbol(), identifier);
-			errorCount++;
-			System.out.println(errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
-        }
+		handleUndeclaredVariableUse(identifier);
 	}
-	
-	@Override 
+
+	@Override
 	public void enterAssignStatement(OfpParser.AssignStatementContext ctx) {
-		String identifier = ctx.IDENTIFIER().getText();
-		Function function = declaredFunctions.get(currentFunction);
-		Symbol usedSymbol = function.resolve(identifier);
-		
-        if(usedSymbol == null){
-			errorCount++;
-			System.out.println(errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
-        }
+		TerminalNode identifierNode = ctx.IDENTIFIER();
+		if (identifierNode != null) {
+			String identifier = ctx.IDENTIFIER().getText();
+			handleUndeclaredVariableUse(identifier);
+		}
 	}
 
 	@Override
@@ -73,8 +93,21 @@ public class CheckRefListener extends OfpBaseListener {
 		}
 	}
 
-	@Override
-	public void exitFunctionCall(OfpParser.FunctionCallContext ctx) {
+	private void handleUndeclaredVariableUse(String identifier) {
+		Symbol usedSymbol = currentScope.resolve(identifier);
 
+		if (usedSymbol == null) {
+			errorCount++;
+			System.out.println(
+					errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
+		}
+	}
+
+	public void enterScope(ParserRuleContext ctx) {
+		currentScope = scopes.get(ctx);
+	}
+
+	private void exitScope() {
+		currentScope = currentScope.getEnclosingScope();
 	}
 }

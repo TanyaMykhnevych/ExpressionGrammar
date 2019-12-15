@@ -32,10 +32,15 @@ arrayType
 
 literal
     : FLOAT_LITERAL
+    #floatLiteralExpression
     | INTEGER_LITERAL
+    #intLiteralExpression
     | CHAR_LITERAL
+    #charLiteralExpression
     | STRING_LITERAL
+    #stringLiteralExpression
     | BOOL_LITERAL
+    #boolLiteralExpression
     ;
 
 functionDeclaration
@@ -143,9 +148,15 @@ conditionExpression
     
 booleanExpression
     : functionCall
-    | expression (EQUAL | LT | GT) expression
+    # functionCallBooleanExpression
+    | expression (LT | GT) expression
+    # gtLtBooleanExpression
+    | expression (EQUAL) expression
+    # compareBooleanExpression
     | BOOL_LITERAL
+    # booleanLiteralExpression
     | IDENTIFIER
+    # identifierBooleanExpression
     ;
 
 elseStatement
@@ -226,7 +237,7 @@ expression
     | expression (GT | LT) expression
     # gtLtExpression
     | expression (EQUAL) expression
-    # assigmentExpression
+    # compareExpression
     ;
     
 builtintFunctionArgument
