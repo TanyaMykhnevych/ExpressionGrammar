@@ -1,0 +1,10 @@
+## Instructions to run program ##
+1. To run program from .jar file
+	1.1 Unzip folder, go to .jar location and run command
+		java -jar assigment2.jar [input_file_name].ofp
+		
+2. To run program from Eclipse
+	2.1 Unzip folder and open Assignment2\FedirkoMykhnevych.A2 folder in Eclipse
+	2.2 Main function is located in ExpressionsMain
+	2.3 Specify input file in debug configuration (only .ofp extension is supported)
+	2.4 Run ExpressionsMain as Java Application
