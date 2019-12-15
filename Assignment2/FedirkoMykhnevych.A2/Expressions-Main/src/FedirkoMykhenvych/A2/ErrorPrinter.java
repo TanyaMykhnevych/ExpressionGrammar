@@ -13,6 +13,10 @@ public final class ErrorPrinter{
 		errorCount++;
 	}
 	
+	public static int errorCount() {
+		return errorCount;
+	}
+	
     public static void printFullError(Recognizer recognizer, Token offendingToken, String message, String symbol, String location){
         ErrorPrinter.printFileNameAndLineNumber(offendingToken);
         System.err.println(message);
@@ -34,6 +38,7 @@ public final class ErrorPrinter{
     }
         
     public static void printRawString(String text) {
+    	reportError();
     	System.err.println();
     	System.err.println(text);
     }

@@ -58,6 +58,9 @@ public class ExpressionsMain {
 
 		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions, scopes, parser);
 		typeChecker.visit(root);
+
+		System.out.println("Total errors count: " + ErrorPrinter.errorCount());
+
 	}
 
 	public static String getFileName() {

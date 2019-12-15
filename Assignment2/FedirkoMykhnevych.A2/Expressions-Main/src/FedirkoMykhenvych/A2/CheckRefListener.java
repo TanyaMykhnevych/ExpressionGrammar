@@ -15,15 +15,10 @@ public class CheckRefListener extends OfpBaseListener {
 	final Map<String, Function> declaredFunctions;
 
 	private String currentFunction;
-	int errorCount = 0; // Keep track of the total number of errors
 
 	public CheckRefListener(Map<String, Function> functions, ParseTreeProperty<Scope> scopes) {
 		this.scopes = scopes;
 		this.declaredFunctions = functions;
-	}
-
-	public int getErrorCount() {
-		return errorCount;
 	}
 
 	@Override
@@ -88,8 +83,7 @@ public class CheckRefListener extends OfpBaseListener {
 		String name = ctx.getChild(0).getText();
 		Symbol sym = declaredFunctions.get(name);
 		if (sym == null || !(sym instanceof Function)) {
-			errorCount++;
-			System.out.println(errorCount + "\nUndeclared function call in function " + currentFunction + ": " + name);
+			ErrorPrinter.printRawString("Undeclared function call in function " + currentFunction + ": " + name);
 		}
 	}
 
@@ -97,9 +91,7 @@ public class CheckRefListener extends OfpBaseListener {
 		Symbol usedSymbol = currentScope.resolve(identifier);
 
 		if (usedSymbol == null) {
-			errorCount++;
-			System.out.println(
-					errorCount + "\nUndeclared variable use in function " + currentFunction + ": " + identifier);
+			ErrorPrinter.printRawString("Undeclared variable use in function " + currentFunction + ": " + identifier);
 		}
 	}
 

@@ -36,7 +36,7 @@ public class SymbolTableListener extends OfpBaseListener {
 	}
 	
 	@Override public void enterStart(OfpParser.StartContext ctx) {
-		System.out.println("Start building expression tree");
+		System.out.println("\nStart building expression tree");
 	}
 
 	@Override
