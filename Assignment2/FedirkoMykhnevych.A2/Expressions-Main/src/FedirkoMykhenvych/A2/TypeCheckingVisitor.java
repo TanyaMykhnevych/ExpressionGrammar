@@ -122,7 +122,20 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return visitChildren(ctx);
 	}
 
-	/*@Override
+	@Override
+	public OFPType visitUnaryMinusExpression(OfpParser.UnaryMinusExpressionContext ctx) {
+		OFPType number = visit(ctx.expression());
+		if (number.getName() != OFPType.intType.getName() && number.getName() != OFPType.floatType.getName()) {
+			errorCount++;
+			ErrorPrinter.printFileNameAndLineNumber(ctx.SUB().getSymbol());
+			System.err.println("error: bad operand type " + number + " for unary operator '-'");
+			ErrorPrinter.underlineError(parser, ctx.SUB().getSymbol());
+		}
+		return OFPType.boolType;
+	}
+
+	
+	/* @Override
 	public OFPType visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
 		OFPType lhsType = visit(ctx.expression(0));
 		OFPType rhsType = visit(ctx.expression(1));
@@ -134,7 +147,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		}
 		return lhsType;
 	}
-	
+
 	@Override
 	public OFPType visitMulDivExpression(OfpParser.MulDivExpressionContext ctx) {
 		OFPType lhsType = visit(ctx.expression(0));
@@ -147,7 +160,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		}
 		return lhsType;
 	}
-	
+
 	@Override
 	public OFPType visitWhileStatement(OfpParser.WhileStatementContext ctx) {
 		currentScope = scopes.get(ctx);
