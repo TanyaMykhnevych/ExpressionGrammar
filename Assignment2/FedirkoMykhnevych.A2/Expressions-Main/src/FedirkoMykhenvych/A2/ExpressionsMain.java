@@ -2,7 +2,9 @@ package FedirkoMykhenvych.A2;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
@@ -15,14 +17,22 @@ import FedirkoMykhnevych.A2.*;
 public class ExpressionsMain {
 
 	private static String inputFile = null;
+	private final static List<String> INPUT_EXTENSIONS = Arrays.asList("ofp");
 
 	public static void main(String[] args) throws Exception {
 		Path currentRelativePath = Paths.get("");
 		String s = currentRelativePath.toAbsolutePath().toString();
 		System.out.println("Current relative path is: " + s);
 
-		for (int i = 0; i < args.length; i++)
-			runFile(args[i]);
+		for (int i = 0; i < args.length; i++) {
+			String extension = getExtensionByStringHandling(args[i]);
+			if (INPUT_EXTENSIONS.contains(extension)) {
+				runFile(args[i]);
+			} else {
+				System.out.println("Unsupported file extension: " + extension);
+				return;
+			}
+		}
 
 		System.out.println("Done!");
 	}
@@ -52,6 +62,10 @@ public class ExpressionsMain {
 
 	public static String getFileName() {
 		return inputFile;
+	}
+
+	private static String getExtensionByStringHandling(String filePath) {
+		return filePath.substring(filePath.lastIndexOf(".") + 1);
 	}
 
 }

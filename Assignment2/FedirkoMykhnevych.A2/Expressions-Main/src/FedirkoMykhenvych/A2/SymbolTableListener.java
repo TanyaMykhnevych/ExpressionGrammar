@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -33,10 +34,15 @@ public class SymbolTableListener extends OfpBaseListener {
 		this.scopes = scopes;
 		this.parser = parser;
 	}
+	
+	@Override public void enterStart(OfpParser.StartContext ctx) {
+		System.out.println("Start building expression tree");
+	}
 
 	@Override
 	public void enterFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
 		String functionName = ctx.IDENTIFIER().getText();
+		System.out.println("Enter function: " + functionName);
 		ReturnValueContext returnCtx = ctx.returnValue();
 		OFPType returnType = returnCtx == null ? OFPType.voidType : OFPType.getTypeFor(returnCtx.getText());
 		Function function = new Function(functionName, returnType);
@@ -53,6 +59,8 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void exitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		String functionName = ctx.IDENTIFIER().getText();
+		System.out.println("Exit function: " + functionName);
 		exitScope();
 	}
 
@@ -62,6 +70,8 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		OFPType paramType = OFPType.getTypeFor(ctx.type().getText());
 		String paramIdentifier = ctx.IDENTIFIER().getText();
+
+		System.out.println("Enter parameter. Name: " + paramIdentifier +" Type: " + paramType.getName());
 
 		if (currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
 			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate param declaration: ",
@@ -74,6 +84,7 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void enterMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
+		System.out.println("Enter function: main");
 		if (mainWasDeclared) {
 			ErrorPrinter.printFullError(parser, null, "function ", "main", currentScope.getScopeName());
 		}
@@ -87,11 +98,13 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void exitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
+		System.out.println("Exit function: main");
 		exitScope();
 	}
 
 	@Override
 	public void enterIfStatement(OfpParser.IfStatementContext ctx) {
+		System.out.println("Enter IF statement");
 		Scope ifScope = new BaseScope(currentScope);
 		saveScope(ctx, ifScope);
 		enterScope(ifScope);
@@ -99,11 +112,13 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void exitIfStatement(OfpParser.IfStatementContext ctx) {
+		System.out.println("Exit IF statement");
 		exitScope();
 	}
 
 	@Override
 	public void enterWhileStatement(OfpParser.WhileStatementContext ctx) {
+		System.out.println("Enter WHILE statement");
 		Scope whileScope = new BaseScope(currentScope);
 		saveScope(ctx, whileScope);
 		enterScope(whileScope);
@@ -111,6 +126,7 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void exitWhileStatement(OfpParser.WhileStatementContext ctx) {
+		System.out.println("Exit WHILE statement");
 		exitScope();
 	}
 
@@ -124,6 +140,9 @@ public class SymbolTableListener extends OfpBaseListener {
 
 		for (TerminalNode tn : identifiers) {
 			Symbol s = new Symbol(tn.getText(), type);
+
+			System.out.println("Enter variable declaration. Name: " + s.getName()
+			+" Type: " + s.getType().getName());
 
 			if (currentScope.resolve(s.getName()) != null)
 				ErrorPrinter.printFullError(parser, tn.getSymbol(), "Duplicate variable declaration: ", s.getName(),
