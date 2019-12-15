@@ -122,7 +122,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return visitChildren(ctx);
 	}
 
-	@Override
+	/*@Override
 	public OFPType visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
 		OFPType lhsType = visit(ctx.expression(0));
 		OFPType rhsType = visit(ctx.expression(1));
@@ -135,7 +135,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return lhsType;
 	}
 	
-	/*@Override
+	@Override
 	public OFPType visitMulDivExpression(OfpParser.MulDivExpressionContext ctx) {
 		OFPType lhsType = visit(ctx.expression(0));
 		OFPType rhsType = visit(ctx.expression(1));
