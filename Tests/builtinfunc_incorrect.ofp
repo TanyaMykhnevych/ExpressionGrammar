@@ -1,0 +1,30 @@
+void main(){
+    int[] x;
+    float[] y;
+    char[] c;
+
+    print(x);
+    print(y);
+    print(c);
+    println(x);
+    println(y);
+    println(c);
+
+    print(getint());
+    print(getfloat());
+    print(getchar());
+
+    println(getint());
+    println(getfloat());
+    println(getchar());
+}
+
+int[] getint(){
+    return new int[2];
+}
+float[] getfloat(){
+    return new float[2];
+}
+char[] getchar(){
+    return new char[2];
+}

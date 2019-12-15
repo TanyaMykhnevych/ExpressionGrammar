@@ -56,6 +56,10 @@ public class OFPType {
 		return new OFPType(this.name.replace("[]", ""));
 	}
 
+	public OFPType FromPrimitiveToArray() {
+		return new OFPType(this.name + "[]");
+	}
+	
 	public boolean equals(OFPType type) {
 		return this.getName().contentEquals(type.getName());
 	}

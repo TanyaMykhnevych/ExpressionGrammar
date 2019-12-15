@@ -107,12 +107,12 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	}
 
 	@Override
-	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx) {
+	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx){
 		String fName = ctx.getChild(0).getText();
 		Function fSymbol = declaredFunctions.get(fName);
 
 		if (fSymbol == null) {
-			return visitChildren(ctx);
+			fSymbol.getName();
 		}
 
 		List<OFPType> pTypes = fSymbol.getParamTypes();
@@ -125,10 +125,14 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 			argTypes.add(argType);
 		}
 
-		// Compare number of args vs parameters
-		String eMsg = "Param/arg mismatch in call to function " + fName + " in function " + currentFunction.getName();
 
+		// Compare number of args vs parameters
 		if (argTypes.size() != pTypes.size()) {
+
+			String eMsg = "\nParam/arg mismatch in call to function " 
+					    + fName + " in function "
+					    + currentFunction.getName();
+
 			ErrorPrinter.printRawString(eMsg);
 			return null;
 		}
@@ -144,7 +148,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 
 		}
 
-		return visitChildren(ctx);
+		return fSymbol.getType();
 	}
 
 	@Override
@@ -194,7 +198,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		OFPType lhsType = visit(ctx.expression(0));
 		OFPType rhsType = visit(ctx.expression(1));
 
-		if (lhsType.equals(rhsType)) {
+		if (!lhsType.equals(rhsType)) {
 			ErrorPrinter.printRawString(
 					"Incompatible mul / div op types in function " + currentFunction + ": " + lhsType + ", " + rhsType);
 			return lhsType;
@@ -368,5 +372,12 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		}
 
 		return identifier.getType();
+	}	
+	
+	public OFPType visitNewCreatorExpression(OfpParser.NewCreatorExpressionContext ctx) {
+		String type = ctx.creator().createdName().arrayType().getText();
+		OFPType arrayType = OFPType.getTypeFor(type).FromPrimitiveToArray();
+		
+		return arrayType; 
 	}
 }

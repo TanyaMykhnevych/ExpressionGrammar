@@ -1,0 +1,45 @@
+void main(){
+    int x;
+    float y;
+    char c;
+    string s;
+    bool b;
+    print(x);
+    print(y);
+    print(c);
+    print(s);
+    print(b);
+    println(x);
+    println(y);
+    println(c);
+    println(s);
+    println(b);
+
+    print(getint());
+    print(getfloat());
+    print(getchar());
+    print(getstring());
+    print(getbool());
+
+    println(getint());
+    println(getfloat());
+    println(getchar());
+    println(getstring());
+    println(getbool());    
+}
+
+int getint(){
+    return 1;
+}
+float getfloat(){
+    return 0.5;
+}
+char getchar(){
+    return 'c';
+}
+string getstring(){
+    return "string";
+}
+bool getbool(){
+    return true;
+}
