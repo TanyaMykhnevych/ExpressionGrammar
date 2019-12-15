@@ -232,9 +232,10 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	@Override
 	public OFPType visitWhileStatement(OfpParser.WhileStatementContext ctx) {
 		currentScope = scopes.get(ctx);
-		OFPType booleanExpression = visit(ctx.conditionExpression());
-		visit(ctx.statement());
-		if (booleanExpression.equals(OFPType.boolType)) {
+		
+		OFPType booleanExpression = visit(ctx.conditionExpression().booleanExpression());
+		
+		if (!booleanExpression.equals(OFPType.boolType)) {
 			ErrorPrinter.printFullError(parser, ctx.WHILE().getSymbol(), "Incompatible types in while condition: ",
 					OFPType.boolType.toString(), booleanExpression.toString());
 		}
@@ -379,5 +380,16 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		OFPType arrayType = OFPType.getTypeFor(type).FromPrimitiveToArray();
 		
 		return arrayType; 
+	}
+	
+	@Override
+	public OFPType visitMemberExpression(OfpParser.MemberExpressionContext ctx) {
+		String property = ctx.IDENTIFIER().getText();
+		
+		if(property.contentEquals("length")) {
+			return OFPType.intType;
+		}
+		
+		return null;
 	}
 }

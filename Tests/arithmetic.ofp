@@ -12,3 +12,22 @@ void main() {
 	float c = a+b*3.0;
 	println(c);   # 18.938
 }
+
+void selectionSort(float[] arr){  
+	int i = 0;
+    while (i < arr.length - 1)  {  
+        int smallest = i;  
+        int j = i+1;
+        while (j < arr.length){  
+            if (arr[j] < arr[smallest]){  
+                smallest = j;    # searching for lowest index  
+            } 
+            j = j+1; 
+        }  
+        # Swap
+        float smallestNumber = arr[smallest];   
+        arr[smallest] = arr[i];  
+        arr[i] = smallestNumber; 
+        i = i+1; 
+    }  
+}  
