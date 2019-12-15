@@ -12,8 +12,6 @@ public class Function extends Symbol implements Scope {
 	private Map<String, Symbol> locals = new HashMap<String, Symbol>();
 	private Map<String, Symbol> initializedVariables = new HashMap<String, Symbol>();
 
-	private Scope body;
-
 	private String name;
 
 	public Function(String name, OFPType returnType) {
@@ -61,14 +59,14 @@ public class Function extends Symbol implements Scope {
 		params.put(parameter.getName(), parameter);
 	}
 
-	public List<Symbol> getParams(){
+	public List<Symbol> getParams() {
 		return new ArrayList<Symbol>(params.values());
 	}
-	
-	public List<OFPType> getParamTypes(){
+
+	public List<OFPType> getParamTypes() {
 		List<Symbol> parameterList = getParams();
 		List<OFPType> paramTypes = new ArrayList<OFPType>();
-		for(Symbol var: parameterList){
+		for (Symbol var : parameterList) {
 			paramTypes.add(var.getType());
 		}
 		return paramTypes;

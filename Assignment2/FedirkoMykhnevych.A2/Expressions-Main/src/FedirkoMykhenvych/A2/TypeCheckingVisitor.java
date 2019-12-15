@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import FedirkoMykhnevych.A2.OfpBaseVisitor;
 import FedirkoMykhnevych.A2.OfpParser;
-import FedirkoMykhnevych.A2.OfpParser.ExpressionContext;
 
 public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	private final ParseTreeProperty<Scope> scopes;
@@ -107,13 +105,9 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	}
 
 	@Override
-	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx){
+	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx) {
 		String fName = ctx.getChild(0).getText();
 		Function fSymbol = declaredFunctions.get(fName);
-
-		if (fSymbol == null) {
-			fSymbol.getName();
-		}
 
 		List<OFPType> pTypes = fSymbol.getParamTypes();
 
@@ -125,16 +119,13 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 			argTypes.add(argType);
 		}
 
-
 		// Compare number of args vs parameters
 		if (argTypes.size() != pTypes.size()) {
-
-			String eMsg = "\nParam/arg mismatch in call to function " 
-					    + fName + " in function "
-					    + currentFunction.getName();
+			String eMsg = "Param/arg mismatch in call to function " + fName + " in function "
+					+ currentFunction.getName();
 
 			ErrorPrinter.printRawString(eMsg);
-			return null;
+			return fSymbol.getType();
 		}
 
 		for (int i = 0; i < argTypes.size(); i++) {
@@ -143,7 +134,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 
 			if (argType.getName() != paramType.getName()) {
 				ErrorPrinter.printRawString(i + "'s argument type doesn't match delcared functionParam");
-				return null;
+				return fSymbol.getType();
 			}
 
 		}
@@ -232,9 +223,9 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	@Override
 	public OFPType visitWhileStatement(OfpParser.WhileStatementContext ctx) {
 		currentScope = scopes.get(ctx);
-		
+
 		OFPType booleanExpression = visit(ctx.conditionExpression().booleanExpression());
-		
+
 		if (!booleanExpression.equals(OFPType.boolType)) {
 			ErrorPrinter.printFullError(parser, ctx.WHILE().getSymbol(), "Incompatible types in while condition: ",
 					OFPType.boolType.toString(), booleanExpression.toString());
@@ -373,23 +364,23 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		}
 
 		return identifier.getType();
-	}	
-	
+	}
+
 	public OFPType visitNewCreatorExpression(OfpParser.NewCreatorExpressionContext ctx) {
 		String type = ctx.creator().createdName().arrayType().getText();
 		OFPType arrayType = OFPType.getTypeFor(type).FromPrimitiveToArray();
-		
-		return arrayType; 
+
+		return arrayType;
 	}
-	
+
 	@Override
 	public OFPType visitMemberExpression(OfpParser.MemberExpressionContext ctx) {
 		String property = ctx.IDENTIFIER().getText();
-		
-		if(property.contentEquals("length")) {
+
+		if (property.contentEquals("length")) {
 			return OFPType.intType;
 		}
-		
+
 		return null;
 	}
 }

@@ -1,20 +1,15 @@
 package FedirkoMykhenvych.A2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import FedirkoMykhnevych.A2.OfpBaseListener;
 import FedirkoMykhnevych.A2.OfpParser;
-import FedirkoMykhnevych.A2.OfpParser.FunctionDeclarationContext;
 import FedirkoMykhnevych.A2.OfpParser.ReturnValueContext;
 
 public class SymbolTableListener extends OfpBaseListener {
@@ -34,8 +29,9 @@ public class SymbolTableListener extends OfpBaseListener {
 		this.scopes = scopes;
 		this.parser = parser;
 	}
-	
-	@Override public void enterStart(OfpParser.StartContext ctx) {
+
+	@Override
+	public void enterStart(OfpParser.StartContext ctx) {
 		System.out.println("\nStart building expression tree");
 	}
 
@@ -71,7 +67,7 @@ public class SymbolTableListener extends OfpBaseListener {
 		OFPType paramType = OFPType.getTypeFor(ctx.type().getText());
 		String paramIdentifier = ctx.IDENTIFIER().getText();
 
-		System.out.println("Enter parameter. Name: " + paramIdentifier +" Type: " + paramType.getName());
+		System.out.println("Enter parameter. Name: " + paramIdentifier + " Type: " + paramType.getName());
 
 		if (currentScope.resolve(ctx.IDENTIFIER().getText()) != null)
 			ErrorPrinter.printFullError(parser, ctx.IDENTIFIER().getSymbol(), "Duplicate param declaration: ",
@@ -141,8 +137,7 @@ public class SymbolTableListener extends OfpBaseListener {
 		for (TerminalNode tn : identifiers) {
 			Symbol s = new Symbol(tn.getText(), type);
 
-			System.out.println("Enter variable declaration. Name: " + s.getName()
-			+" Type: " + s.getType().getName());
+			System.out.println("Enter variable declaration. Name: " + s.getName() + " Type: " + s.getType().getName());
 
 			if (currentScope.resolve(s.getName()) != null)
 				ErrorPrinter.printFullError(parser, tn.getSymbol(), "Duplicate variable declaration: ", s.getName(),
