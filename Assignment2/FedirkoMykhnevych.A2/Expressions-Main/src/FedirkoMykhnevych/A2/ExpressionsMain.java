@@ -1,5 +1,7 @@
-package FedirkoMykhenvych.A2;
+package FedirkoMykhnevych.A2;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import FedirkoMykhnevych.A2.*;
+import FedirkoMykhnevych.A3.PythonCodeGenerator;
 
 public class ExpressionsMain {
 
@@ -59,7 +62,21 @@ public class ExpressionsMain {
 		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions, scopes, parser);
 		typeChecker.visit(root);
 
+		PythonCodeGenerator pyGen = new PythonCodeGenerator(declaredFunctions, scopes);
+		String pyProgram = pyGen.visit(root);
+
 		System.out.println("Total errors count: " + ErrorPrinter.errorCount());
+
+		String pyOutputPath = inputFile.replaceAll("\\.ofp$", ".py");
+		try {
+			PrintWriter pw = new PrintWriter(pyOutputPath);
+			pw.print(pyProgram);
+			pw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("\nPython program saved as: " + pyOutputPath);
 
 	}
 

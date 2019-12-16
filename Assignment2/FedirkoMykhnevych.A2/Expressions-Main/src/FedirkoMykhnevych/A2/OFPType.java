@@ -1,4 +1,4 @@
-package FedirkoMykhenvych.A2;
+package FedirkoMykhnevych.A2;
 
 public class OFPType {
 	public static final OFPType intType = new OFPType("int");

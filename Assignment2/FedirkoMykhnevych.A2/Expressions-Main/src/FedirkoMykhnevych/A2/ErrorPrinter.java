@@ -1,4 +1,4 @@
-package FedirkoMykhenvych.A2;
+package FedirkoMykhnevych.A2;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CommonTokenStream;

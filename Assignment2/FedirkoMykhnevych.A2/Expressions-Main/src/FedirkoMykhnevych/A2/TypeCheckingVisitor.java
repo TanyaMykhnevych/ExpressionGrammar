@@ -1,4 +1,4 @@
-package FedirkoMykhenvych.A2;
+package FedirkoMykhnevych.A2;
 
 import java.util.ArrayList;
 import java.util.List;

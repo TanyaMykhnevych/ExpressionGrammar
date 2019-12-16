@@ -1,4 +1,4 @@
-package FedirkoMykhenvych.A2;
+package FedirkoMykhnevych.A2;
 
 public class Symbol {
 	private final String name;
