@@ -59,8 +59,9 @@ public class ExpressionsMain {
 		CheckRefListener rl = new CheckRefListener(declaredFunctions, scopes);
 		walker.walk(rl, root);
 
-		TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions, scopes, parser);
-		typeChecker.visit(root);
+		// TypeCheckingVisitor typeChecker = new TypeCheckingVisitor(declaredFunctions,
+		// scopes, parser);
+		// typeChecker.visit(root);
 
 		PythonCodeGenerator pyGen = new PythonCodeGenerator(declaredFunctions, scopes);
 		String pyProgram = pyGen.visit(root);
