@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
@@ -18,7 +17,6 @@ import FedirkoMykhnevych.A2.Scope;
 public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	private final ParseTreeProperty<Scope> scopes;
 	private Scope currentScope;
-	private Function currentFunction;
 	final Map<String, Function> declaredFunctions;
 
 	private int depth = 0; // The current depth/indentation level
@@ -109,6 +107,11 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
+	public String visitLiteralExpression(OfpParser.LiteralExpressionContext ctx) {
+		return ctx.getText();
+	}
+
+	@Override
 	public String visitArrayInitializer(OfpParser.ArrayInitializerContext ctx) {
 		StringBuilder buf = new StringBuilder();
 		buf.append(visit(ctx.getChild(1)));
@@ -143,6 +146,81 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
+	public String visitStatement(OfpParser.StatementContext ctx) {
+		return ctx.getChild(0).getText().contentEquals(";") ? "" : visit(ctx.getChild(0));
+	}
+
+	@Override
+	public String visitGeneralStatement(OfpParser.GeneralStatementContext ctx) {
+		return visit(ctx.getChild(0));
+	}
+
+	@Override
+	public String visitWhileStatement(OfpParser.WhileStatementContext ctx) {
+		String whilefCondition = "while " + visit(ctx.getChild(1)) + ":\n";
+		depth++;
+		String whileBody = visit(ctx.getChild(2));
+		depth--;
+		return indent(depth) + whilefCondition + whileBody;
+	}
+
+	@Override
+	public String visitConditionExpression(OfpParser.ConditionExpressionContext ctx) {
+		return visit(ctx.getChild(1));
+	}
+
+	@Override
+	public String visitGtLtBooleanExpression(OfpParser.GtLtBooleanExpressionContext ctx) {
+		return visit(ctx.getChild(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.getChild(2));
+	}
+
+	@Override
+	public String visitBooleanEqualsExpression(OfpParser.BooleanEqualsExpressionContext ctx) {
+		return visit(ctx.getChild(0)) + " = " + visit(ctx.getChild(2));
+	}
+
+	@Override
+	public String visitIdentifierBooleanExpression(OfpParser.IdentifierBooleanExpressionContext ctx) {
+		return ctx.IDENTIFIER().getText();
+	}
+
+	@Override
+	public String visitFunctionCallBooleanExpression(OfpParser.FunctionCallBooleanExpressionContext ctx) {
+		return visit(ctx.getChild(0));
+	}
+
+	@Override
+	public String visitIfStatement(OfpParser.IfStatementContext ctx) {
+		String ifCondition = "if " + visit(ctx.getChild(1)) + ":\n";
+		depth++;
+		String ifBody = visit(ctx.getChild(2));
+		depth--;
+		String elseBody = ctx.getChild(3) != null ? visit(ctx.getChild(3)) : "";
+		return indent(depth) + ifCondition + ifBody + elseBody;
+
+	}
+
+	@Override
+	public String visitIfBody(OfpParser.IfBodyContext ctx) {
+		return visit(ctx.getChild(1));
+	}
+
+	@Override
+	public String visitElseStatement(OfpParser.ElseStatementContext ctx) {
+		String result = "else:\n";
+		depth++;
+		result += visit(ctx.getChild(1));
+		depth--;
+
+		return result;
+	}
+
+	@Override
+	public String visitIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) {
+		return getSafePythonId(ctx.IDENTIFIER().getText());
+	}
+
+	@Override
 	public String visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
 		ParseTree variableDeclarators = ctx.getChild(1);
 		ParseTree variableDeclarator = variableDeclarators.getChild(0);
@@ -162,7 +240,18 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		String expr = "";
 		expr = visit(ctx.expression());
 
-		return indent(depth) + getSafePythonId(variableId) + " = " + expr;
+		return indent(depth) + getSafePythonId(variableId) + " = " + expr + "\n";
+	}
+
+	@Override
+	public String visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
+		String returnExpression = visit(ctx.getChild(1));
+		return indent(depth) + "return " + returnExpression + "\n";
+	}
+
+	@Override
+	public String visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
+		return visit(ctx.getChild(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.getChild(2));
 	}
 
 	@Override
@@ -198,7 +287,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	@Override
 	public String visitParamsList(OfpParser.ParamsListContext ctx) {
 		StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < ctx.getChildCount(); i++) {
+		for (int i = 0; i < ctx.getChildCount(); i += 2) {
 			String p = visit(ctx.getChild(i));
 			if (i != ctx.getChildCount() - 1) {
 				p += ", ";
@@ -211,6 +300,44 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	@Override
 	public String visitParam(OfpParser.ParamContext ctx) {
 		return getSafePythonId(ctx.getChild(1).getText());
+	}
+
+	@Override
+	public String visitFunctionCall(OfpParser.FunctionCallContext ctx) {
+		return getSafePythonId(ctx.IDENTIFIER().getText()) + "(" + visit(ctx.getChild(1)) + ")";
+	}
+
+	@Override
+	public String visitArguments(OfpParser.ArgumentsContext ctx) {
+		return visit(ctx.getChild(1));
+	}
+
+	@Override
+	public String visitExpressionList(OfpParser.ExpressionListContext ctx) {
+		StringBuilder buf = new StringBuilder();
+		for (int i = 0; i < ctx.getChildCount(); i += 2) {
+			ParserRuleContext p = (ParserRuleContext) ctx.getChild(i);
+			buf.append(visit(p));
+			if (i != ctx.getChildCount() - 1) {
+				buf.append(", ");
+			}
+		}
+		return buf.toString();
+	}
+
+	@Override
+	public String visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
+		return visit(ctx.getChild(0)) + "(" + visit(ctx.getChild(2)) + ")";
+	}
+
+	@Override
+	public String visitBuiltinFunction(OfpParser.BuiltinFunctionContext ctx) {
+		return ctx.getChild(0).getText();
+	}
+
+	@Override
+	public String visitBuiltintFunctionArgument(OfpParser.BuiltintFunctionArgumentContext ctx) {
+		return visit(ctx.getChild(0));
 	}
 
 	@Override
