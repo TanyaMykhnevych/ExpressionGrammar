@@ -341,6 +341,21 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
+	public String visitNewCreatorExpression(OfpParser.NewCreatorExpressionContext ctx) {
+		return "[]";
+	}
+
+	@Override
+	public String visitVariableInitializer(OfpParser.VariableInitializerContext ctx) {
+		return visit(ctx.getChild(0));
+	}
+
+	@Override
+	public String visitArrayIndexExpression(OfpParser.ArrayIndexExpressionContext ctx) {
+		return visit(ctx.getChild(0)) + '[' + visit(ctx.getChild(2)) + ']';
+	}
+
+	@Override
 	public String visitStart(OfpParser.StartContext ctx) {
 		StringBuilder buf = new StringBuilder();
 
