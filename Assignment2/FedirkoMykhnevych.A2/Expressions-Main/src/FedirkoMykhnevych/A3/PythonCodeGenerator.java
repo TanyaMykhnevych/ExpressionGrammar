@@ -176,7 +176,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitBooleanEqualsExpression(OfpParser.BooleanEqualsExpressionContext ctx) {
-		return visit(ctx.getChild(0)) + " = " + visit(ctx.getChild(2));
+		return visit(ctx.getChild(0)) + " == " + visit(ctx.getChild(2));
 	}
 
 	@Override
@@ -327,7 +327,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
-		return visit(ctx.getChild(0)) + "(" + visit(ctx.getChild(2)) + ")";
+		return visit(ctx.getChild(0)) + "(" + visit(ctx.getChild(2)) + ")\n";
 	}
 
 	@Override
