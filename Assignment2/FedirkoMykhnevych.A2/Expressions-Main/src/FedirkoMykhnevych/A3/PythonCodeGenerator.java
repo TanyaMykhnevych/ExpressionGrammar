@@ -217,7 +217,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitIfBody(OfpParser.IfBodyContext ctx) {
-		return visit(ctx.getChild(1));
+		return ctx.getChildCount() > 2 ? visit(ctx.getChild(1)) : visit(ctx.getChild(0));
 	}
 
 	@Override
