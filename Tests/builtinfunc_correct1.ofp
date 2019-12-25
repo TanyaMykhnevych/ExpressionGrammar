@@ -1,9 +1,9 @@
 void main(){
-    int x;
-    float y;
-    char c;
-    string s;
-    bool b;
+    int x = 1;
+    float y = 2;
+    char c = 'c';
+    string s = "sbrkt";
+    bool b = true;
     print(x);
     print(y);
     print(c);

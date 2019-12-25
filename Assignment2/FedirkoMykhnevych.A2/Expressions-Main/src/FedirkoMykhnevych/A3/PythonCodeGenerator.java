@@ -8,8 +8,11 @@ import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import FedirkoMykhnevych.A2.ErrorPrinter;
 import FedirkoMykhnevych.A2.Function;
+import FedirkoMykhnevych.A2.OFPType;
 import FedirkoMykhnevych.A2.OfpBaseVisitor;
 import FedirkoMykhnevych.A2.OfpParser;
 import FedirkoMykhnevych.A2.Scope;
@@ -71,7 +74,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	@Override
 	public String visitBoolLiteralExpression(OfpParser.BoolLiteralExpressionContext ctx) {
 		String b = ctx.getChild(0).getText();
-		if (b.equals("true"))
+		if (b.contentEquals("true"))
 			return "True";
 		else
 			return "False";
@@ -80,7 +83,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	@Override
 	public String visitBooleanLiteralExpression(OfpParser.BooleanLiteralExpressionContext ctx) {
 		String b = ctx.getChild(0).getText();
-		if (b.equals("true"))
+		if (b.contentEquals("true"))
 			return "True";
 		else
 			return "False";
@@ -103,11 +106,6 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitFloatLiteralExpression(OfpParser.FloatLiteralExpressionContext ctx) {
-		return ctx.getText();
-	}
-
-	@Override
-	public String visitLiteralExpression(OfpParser.LiteralExpressionContext ctx) {
 		return ctx.getText();
 	}
 
@@ -146,6 +144,12 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
+	public String visitBracketsExpression(OfpParser.BracketsExpressionContext ctx) {
+		return "(" + visit(ctx.expression()) + ")";
+	}
+	
+	
+	@Override
 	public String visitStatement(OfpParser.StatementContext ctx) {
 		return ctx.getChild(0).getText().contentEquals(";") ? "" : visit(ctx.getChild(0));
 	}
@@ -171,14 +175,25 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitGtLtBooleanExpression(OfpParser.GtLtBooleanExpressionContext ctx) {
-		return visit(ctx.getChild(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.getChild(2));
+		return visit(ctx.expression(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.expression(1));
 	}
+	
+	@Override
+	public String visitGtLtExpression(OfpParser.GtLtExpressionContext ctx) {
+		return visit(ctx.expression(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.expression(1));
+	}
+
 
 	@Override
 	public String visitBooleanEqualsExpression(OfpParser.BooleanEqualsExpressionContext ctx) {
-		return visit(ctx.getChild(0)) + " == " + visit(ctx.getChild(2));
+		return visit(ctx.expression(0)) + " == " + visit(ctx.expression(1));
 	}
 
+
+	public String visitEqualsExpression(OfpParser.EqualsExpressionContext ctx) {
+		return visit(ctx.expression(0)) + " == " + visit(ctx.expression(1));
+	}
+	
 	@Override
 	public String visitIdentifierBooleanExpression(OfpParser.IdentifierBooleanExpressionContext ctx) {
 		return ctx.IDENTIFIER().getText();
@@ -234,9 +249,19 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 			return ""; // see the next slide!!!
 	}
 
-	@Override
-	public String visitAssignStatement(OfpParser.AssignStatementContext ctx) {
+	@Override 
+	public String visitArrayElementAssignStatement(OfpParser.ArrayElementAssignStatementContext ctx) { 
 		String variableId = ctx.IDENTIFIER().getText();
+		String indexerExpr = visit(ctx.expression(0));
+		
+		String rhExpr = visit(ctx.expression(1));
+		
+		return indent(depth) + getSafePythonId(variableId) + "[" + indexerExpr + "]" + " = " + rhExpr + "\n";			
+	}
+	
+	@Override 
+	public String visitVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) { 
+		String variableId = ctx.IDENTIFIER().getText();		
 		String expr = "";
 		expr = visit(ctx.expression());
 
@@ -245,13 +270,22 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
-		String returnExpression = visit(ctx.getChild(1));
+		if(ctx.expression() == null) {
+			return indent(depth) + "return";
+		}
+		
+		String returnExpression = visit(ctx.expression());
 		return indent(depth) + "return " + returnExpression + "\n";
 	}
 
 	@Override
 	public String visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
 		return visit(ctx.getChild(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.getChild(2));
+	}
+	
+	@Override
+	public String visitMulDivExpression(OfpParser.MulDivExpressionContext ctx) {
+		return  visit(ctx.getChild(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.getChild(2));
 	}
 
 	@Override
@@ -303,13 +337,21 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
-	public String visitFunctionCall(OfpParser.FunctionCallContext ctx) {
-		return getSafePythonId(ctx.IDENTIFIER().getText()) + "(" + visit(ctx.getChild(1)) + ")";
+	public String visitFunctionCall(OfpParser.FunctionCallContext ctx) {		
+		String funcName = getSafePythonId(ctx.IDENTIFIER().getText());
+		String args = visit(ctx.arguments());
+		
+		return funcName + "(" + args + ")";
 	}
 
 	@Override
-	public String visitArguments(OfpParser.ArgumentsContext ctx) {
-		return visit(ctx.getChild(1));
+	public String visitArguments(OfpParser.ArgumentsContext ctx) {		
+		if(ctx.expressionList() == null)
+			return "";
+		
+		String args = visit(ctx.expressionList());
+		
+		return args;
 	}
 
 	@Override
@@ -327,7 +369,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	@Override
 	public String visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
-		return visit(ctx.getChild(0)) + "(" + visit(ctx.getChild(2)) + ")\n";
+		return indent(depth) + "print" + "(" + visit(ctx.getChild(2)) + ")\n";
 	}
 
 	@Override
@@ -371,5 +413,18 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		}
 		buf.append(visit(main));
 		return buf.toString();
+	}
+	
+	@Override
+	public String visitMemberExpression(OfpParser.MemberExpressionContext ctx) {
+		String property = ctx.IDENTIFIER().getText();
+
+		if (!property.contentEquals("length")) {
+			return null;
+		}
+		
+		String member = visit(ctx.expression());
+
+		return "len(" + member + ")";
 	}
 }

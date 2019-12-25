@@ -70,7 +70,7 @@ public class CheckRefListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterAssignStatement(OfpParser.AssignStatementContext ctx) {
+	public void enterVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) {
 		TerminalNode identifierNode = ctx.IDENTIFIER();
 		if (identifierNode != null) {
 			String identifier = ctx.IDENTIFIER().getText();

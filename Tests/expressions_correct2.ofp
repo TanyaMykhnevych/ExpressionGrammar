@@ -2,7 +2,7 @@ void main(){
     int[] arrOne = new int[2];
     int[] arrTwo = new int[3];
 
-    bool eq arrOne[0] == arrTwo[1];
+    bool eq = arrOne[0] == arrTwo[1];
 
     if(arrOne[0] == arrTwo[1]){
         print("Some equality");

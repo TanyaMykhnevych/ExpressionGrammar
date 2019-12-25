@@ -188,7 +188,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	public OFPType visitMulDivExpression(OfpParser.MulDivExpressionContext ctx) {
 		OFPType lhsType = visit(ctx.expression(0));
 		OFPType rhsType = visit(ctx.expression(1));
-
+		
 		if (!lhsType.equals(rhsType)) {
 			ErrorPrinter.printRawString(
 					"Incompatible mul / div op types in function " + currentFunction + ": " + lhsType + ", " + rhsType);
@@ -203,20 +203,40 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		// todo: only with int and float
 		return lhsType;
 	}
+	
+	@Override
+	public OFPType visitBracketsExpression(OfpParser.BracketsExpressionContext ctx) {
+		return visit(ctx.expression());
+	}
+	
 
 	// todo: The comparison operator == can also be applied on characters (but not
 	// strings)
-
-	@Override
-	public OFPType visitAssignStatement(OfpParser.AssignStatementContext ctx) {
+	@Override 
+	public OFPType visitArrayElementAssignStatement(OfpParser.ArrayElementAssignStatementContext ctx) { 
+		String variableId = ctx.IDENTIFIER().getText();
+		OFPType lhsType = currentScope.resolve(variableId).getType().FromArrayToPrimitive();
+		
+		// '1' beacause of grammar
+		OFPType rhsType = visit(ctx.expression(1));
+		
+		if (!lhsType.equals(rhsType)) {
+			ErrorPrinter.printRawString("Invalid array element assign statement: incompatible types");
+		}
+		
+		return null;
+	}
+	
+	@Override 
+	public OFPType visitVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) { 
 		String variableId = ctx.IDENTIFIER().getText();
 		OFPType lhsType = currentScope.resolve(variableId).getType();
 		OFPType rhsType = visit(ctx.expression());
-
+		
 		if (!lhsType.equals(rhsType)) {
 			ErrorPrinter.printRawString("Invalid variable assign statement: incompatible types");
-		}
-
+		} 
+		
 		return null;
 	}
 
@@ -366,6 +386,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return identifier.getType();
 	}
 
+	@Override
 	public OFPType visitNewCreatorExpression(OfpParser.NewCreatorExpressionContext ctx) {
 		String type = ctx.creator().createdName().arrayType().getText();
 		OFPType arrayType = OFPType.getTypeFor(type).FromPrimitiveToArray();

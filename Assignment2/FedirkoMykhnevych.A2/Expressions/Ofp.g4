@@ -178,7 +178,7 @@ unarySubstract
     ;
 
 assignStatement 
-    : IDENTIFIER '=' expression
+    : variableAssignStatement
     | arrayElementAssignStatement
     ;
 
@@ -187,6 +187,10 @@ assignStatement
 arrayElementAssignStatement 
     :  IDENTIFIER '[' expression ']' '=' expression
     ;
+
+variableAssignStatement
+	: IDENTIFIER '=' expression
+	;
 
 
 statement
