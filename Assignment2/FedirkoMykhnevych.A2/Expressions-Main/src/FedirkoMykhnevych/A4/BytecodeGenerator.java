@@ -21,14 +21,13 @@ public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
 	private final String progName;
 	final Map<String, Function> declaredFunctions;
 	private final ClassWriter cw;
-	private final GeneratorAdapter mg;
+	private GeneratorAdapter mg;
 
 	public BytecodeGenerator(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, String progName) {
 		this.scopes = scopes;
 		this.declaredFunctions = functions;
 		this.progName = progName;
 		this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		this.mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
 	}
 
 	public byte[] getByteArray() {
@@ -39,10 +38,12 @@ public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
 	public OFPType visitStart(OfpParser.StartContext ctx) {
 		cw.visit(Opcodes.V1_1, Opcodes.ACC_PUBLIC, progName, null, "java/lang/Object", null);
 		Method m = Method.getMethod("void <init> ()");
+		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
 		mg.loadThis();
 		mg.invokeConstructor(Type.getType(Object.class), m);
 		mg.returnValue();
 		mg.endMethod();
+		visitChildren(ctx);
 
 		return null;
 	}
@@ -50,10 +51,35 @@ public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
 	@Override
 	public OFPType visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		Method main = Method.getMethod("void main (String[])");
+		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, main, null, null, cw);
 		visitChildren(ctx);
 		mg.returnValue();
 		mg.endMethod();
 
+		return null;
+	}
+
+	@Override
+	public OFPType visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
+		mg.push(new Integer(ctx.getText()));
+		return null;
+	}
+
+	@Override
+	public OFPType visitFloatLiteralExpression(OfpParser.FloatLiteralExpressionContext ctx) {
+		mg.push(new Double(ctx.getText()));
+		return null;
+	}
+
+	@Override
+	public OFPType visitStringLiteralExpression(OfpParser.StringLiteralExpressionContext ctx) {
+		mg.push(ctx.getText());
+		return null;
+	}
+
+	@Override
+	public OFPType visitCharLiteralExpression(OfpParser.CharLiteralExpressionContext ctx) {
+		mg.push(ctx.getText());
 		return null;
 	}
 }
