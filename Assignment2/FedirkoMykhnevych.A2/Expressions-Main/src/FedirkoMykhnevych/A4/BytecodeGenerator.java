@@ -1,5 +1,6 @@
 package FedirkoMykhnevych.A4;
 
+import java.io.PrintStream;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -15,7 +16,7 @@ import FedirkoMykhnevych.A2.OfpBaseVisitor;
 import FedirkoMykhnevych.A2.OfpParser;
 import FedirkoMykhnevych.A2.Scope;
 
-public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
+public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	private final ParseTreeProperty<Scope> scopes;
 	private Scope currentScope;
 	private final String progName;
@@ -35,7 +36,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
 	}
 
 	@Override
-	public OFPType visitStart(OfpParser.StartContext ctx) {
+	public Type visitStart(OfpParser.StartContext ctx) {
 		cw.visit(Opcodes.V1_1, Opcodes.ACC_PUBLIC, progName, null, "java/lang/Object", null);
 		Method m = Method.getMethod("void <init> ()");
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, m, null, null, cw);
@@ -49,37 +50,62 @@ public class BytecodeGenerator extends OfpBaseVisitor<OFPType> {
 	}
 
 	@Override
-	public OFPType visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
+	public Type visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		Method main = Method.getMethod("void main (String[])");
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, main, null, null, cw);
 		visitChildren(ctx);
 		mg.returnValue();
 		mg.endMethod();
 
-		return null;
+		return Type.VOID_TYPE;
 	}
 
 	@Override
-	public OFPType visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
+	public Type visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
 		mg.push(new Integer(ctx.getText()));
-		return null;
+		return Type.INT_TYPE;
 	}
 
 	@Override
-	public OFPType visitFloatLiteralExpression(OfpParser.FloatLiteralExpressionContext ctx) {
+	public Type visitFloatLiteralExpression(OfpParser.FloatLiteralExpressionContext ctx) {
 		mg.push(new Double(ctx.getText()));
-		return null;
+		return Type.DOUBLE_TYPE;
 	}
 
 	@Override
-	public OFPType visitStringLiteralExpression(OfpParser.StringLiteralExpressionContext ctx) {
+	public Type visitStringLiteralExpression(OfpParser.StringLiteralExpressionContext ctx) {
 		mg.push(ctx.getText());
 		return null;
 	}
 
 	@Override
-	public OFPType visitCharLiteralExpression(OfpParser.CharLiteralExpressionContext ctx) {
+	public Type visitCharLiteralExpression(OfpParser.CharLiteralExpressionContext ctx) {
 		mg.push(ctx.getText());
-		return null;
+		return Type.CHAR_TYPE;
 	}
+
+	// Copied from lecture
+	/*@Override
+	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
+		mg.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
+		Type eType = visit(ctx.getChild(2)); // Push expr, return ASM expr type
+		String type = null; // Select print type
+		if (eType == Type.INT_TYPE)
+			type = "int";
+		else if (eType == Type.DOUBLE_TYPE)
+			type = "double";
+		else if (eType == Type.CHAR_TYPE)
+			type = "char";
+		else if (eType == Type.BOOLEAN_TYPE)
+			type = "boolean";
+		else if (eType.toString().equals("java.lang.String"))
+			type = "java.lang.String";
+		else
+			throw new RuntimeException("Unkown print type " + eType);
+		if (ctx.getChild(0).getText().equals("println"))
+			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void println (" + type + ")"));
+		else
+			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void print (" + type + ")"));
+		return null;
+	}*/
 }
