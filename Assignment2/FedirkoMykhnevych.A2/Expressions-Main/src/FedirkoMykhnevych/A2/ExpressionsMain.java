@@ -10,9 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -76,21 +73,24 @@ public class ExpressionsMain {
 		// processPythonCode(declaredFunctions, scopes, root);
 
 		Path inputFilePath = Paths.get(inputFile);
-		String progName = inputFilePath.getFileName().toString().replaceAll("\\.ofp$", "");
+		String progName = capitalize(inputFilePath.getFileName().toString().replaceAll("\\.ofp$", ""));
 		System.out.println("\nBytecode generation started\n");
-		BytecodeGenerator bcGen = new BytecodeGenerator(declaredFunctions, scopes);
+		BytecodeGenerator bcGen = new BytecodeGenerator(declaredFunctions, scopes, progName);
 		bcGen.visit(root);
+
 		System.out.println("\nPrint bytecode\n");
 		byte[] code = bcGen.getByteArray();
 		ClassReader cr = new ClassReader(code);
 		ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
 		ClassVisitor checker = new CheckClassAdapter(tracer, true);
 		cr.accept(checker, 0);
+
 		File javaOutFile = new File("test_class_files/" + progName + ".class");
 		FileOutputStream fos = new FileOutputStream(javaOutFile);
 		fos.write(code);
 		fos.close();
 		System.out.println("Bytecode saved in " + javaOutFile.getAbsolutePath());
+
 		System.out.println("\nExecuting bytecode");
 		/*
 		 * Main loader = new Main(); Class<?> exampleClass =
@@ -102,6 +102,10 @@ public class ExpressionsMain {
 
 	public static String getFileName() {
 		return inputFile;
+	}	
+
+	private static String capitalize(String input) {
+		return input.substring(0, 1).toUpperCase() + input.substring(1);
 	}
 
 	private static String getExtensionByStringHandling(String filePath) {
