@@ -1,5 +1,7 @@
 package FedirkoMykhnevych.A2;
 
+import org.objectweb.asm.Type;
+
 public class OFPType {
 	public static final OFPType intType = new OFPType("int");
 	public static final OFPType intArrType = new OFPType("int[]");
@@ -32,6 +34,21 @@ public class OFPType {
 			return stringType;
 		default:
 			return undefinedType;
+		}
+	}
+	
+	public Type getType() {
+		switch (name) {
+		case "int":
+			return Type.INT_TYPE;
+		case "char":
+			return Type.CHAR_TYPE;
+		case "float":
+			return Type.FLOAT_TYPE;
+		case "bool":
+			return Type.BOOLEAN_TYPE;
+		default:
+			return null;
 		}
 	}
 
