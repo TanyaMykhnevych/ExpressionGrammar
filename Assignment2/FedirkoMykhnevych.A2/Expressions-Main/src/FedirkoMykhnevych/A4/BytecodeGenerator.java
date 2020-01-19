@@ -107,19 +107,37 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		Function fSymbol = declaredFunctions.get(fName);
 		return fSymbol.getType().getType();
 	}
+	
 
+	@Override 
+	public Type visitPrimitiveType(OfpParser.PrimitiveTypeContext ctx) { 
+		return getTypeByName(ctx.getText());
+	}
+
+	@Override 
+	public Type visitType(OfpParser.TypeContext ctx) { 
+		Type type = visit(ctx.primitiveType());
+
+		mg.storeLocal(1, type);
+		
+		return type;
+	}
+	
 	@Override
 	public Type visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
+		Type variableType = visit(ctx.type());	
+		mg.storeLocal(currentVariableIndex++, variableType);
+		
 		return visitChildren(ctx);
 	}
 
 	// DOES NOT WORK
-	@Override
-	public Type visitVariableDeclarator(OfpParser.VariableDeclaratorContext ctx) {
-		Type type = visit(ctx.getChild(1));
-		mg.storeLocal(currentVariableIndex++, type);
-		return null;
-	}
+	//@Override
+	//public Type visitVariableDeclarator(OfpParser.VariableDeclaratorContext ctx) {
+	//	Type type = visit(ctx.getChild(1));
+	//	mg.storeLocal(currentVariableIndex++, type);
+	//	return null;
+	//}
 
 	@Override
 	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
@@ -180,6 +198,8 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		return visit(ctx.expression());
 	}
 
+	
+	// Char type isnt working
 	@Override
 	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
 		mg.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
@@ -211,6 +231,21 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 			return "boolean";
 		else if (exprType.getClassName().toString().equals("java.lang.String"))
 			return "java.lang.String";
+		else
+			throw new RuntimeException("Unkown print type " + type);
+	}
+	
+	public Type getTypeByName(String type) {		
+		if (type.contentEquals("int")) 
+			return Type.INT_TYPE;		
+		else if (type.contentEquals("double"))
+			return Type.DOUBLE_TYPE;
+		else if (type.contentEquals("char"))
+			return Type.CHAR_TYPE;
+		else if (type.contentEquals("boolean"))
+			return Type.BOOLEAN_TYPE;
+//		else if (type == "string")
+//			return "java.lang.String";
 		else
 			throw new RuntimeException("Unkown print type " + type);
 	}
