@@ -1,13 +1,14 @@
 package FedirkoMykhnevych.A4;
 
+import java.io.PrintStream;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
-import org.objectweb.asm.Opcodes;
 
 import FedirkoMykhnevych.A2.Function;
 import FedirkoMykhnevych.A2.OfpBaseVisitor;
@@ -52,7 +53,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	public Type visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
 		currentVariableIndex = 1;
 		Method main = Method.getMethod("void main (String[])");
-		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC, main, null, null, cw);
+		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, main, null, null, cw);
 		visitChildren(ctx);
 		mg.returnValue();
 		mg.endMethod();
@@ -71,11 +72,17 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		mg.push(new Double(ctx.getText()));
 		return Type.DOUBLE_TYPE;
 	}
+	
+	@Override
+	public Type visitBoolLiteralExpression(OfpParser.BoolLiteralExpressionContext ctx) {
+		mg.push(new Boolean(ctx.getText()));
+		return Type.BOOLEAN_TYPE;
+	}
 
 	@Override
 	public Type visitStringLiteralExpression(OfpParser.StringLiteralExpressionContext ctx) {
 		mg.push(ctx.getText());
-		return null;
+		return Type.getType(String.class);
 	}
 
 	@Override
@@ -173,6 +180,41 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		return visit(ctx.expression());
 	}
 
+	@Override
+	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
+		mg.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
+		
+		Type exprType = visit(ctx.builtintFunctionArgument());
+		
+		String type = getTypename(exprType);
+		
+		if (ctx.builtinFunction().getText().contentEquals("print"))
+			mg.invokeVirtual(Type.getType(PrintStream.class), 
+							 Method.getMethod("void print (" + type + ")"));
+		else
+			mg.invokeVirtual(Type.getType(PrintStream.class), 
+							 Method.getMethod("void println (" + type + ")"));
+		
+		return null;
+	}
+	
+	public String getTypename(Type exprType) {
+		String type = null;
+		
+		if (exprType == Type.INT_TYPE) 
+			return "int";		
+		else if (exprType == Type.DOUBLE_TYPE)
+			return "double";
+		else if (exprType == Type.CHAR_TYPE)
+			return "char";
+		else if (exprType == Type.BOOLEAN_TYPE)
+			return "boolean";
+		else if (exprType.getClassName().toString().equals("java.lang.String"))
+			return "java.lang.String";
+		else
+			throw new RuntimeException("Unkown print type " + type);
+	}
+	
 	// Copied from lecture
 	/*@Override
 	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
