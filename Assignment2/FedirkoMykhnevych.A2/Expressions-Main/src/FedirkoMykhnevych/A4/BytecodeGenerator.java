@@ -54,28 +54,30 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		currentVariableIndex = 1;
 		Method main = Method.getMethod("void main (String[])");
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, main, null, null, cw);
-		visitChildren(ctx);
+		visitChildren(ctx); 
 		mg.returnValue();
 		mg.endMethod();
 
 		return Type.VOID_TYPE;
 	}
-
+	
 	@Override
 	public Type visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
-		mg.push(new Integer(ctx.getText()));
+		int text = Integer.parseInt(ctx.getText());
+		mg.push(new Integer(text));
+		
 		return Type.INT_TYPE;
 	}
 
 	@Override
 	public Type visitFloatLiteralExpression(OfpParser.FloatLiteralExpressionContext ctx) {
-		mg.push(new Double(ctx.getText()));
+		mg.push(new Double(Double.parseDouble(ctx.getText())));
 		return Type.DOUBLE_TYPE;
 	}
 	
 	@Override
 	public Type visitBoolLiteralExpression(OfpParser.BoolLiteralExpressionContext ctx) {
-		mg.push(new Boolean(ctx.getText()));
+		mg.push(new Boolean(Boolean.parseBoolean(ctx.getText())));
 		return Type.BOOLEAN_TYPE;
 	}
 
@@ -117,8 +119,6 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	@Override 
 	public Type visitType(OfpParser.TypeContext ctx) { 
 		Type type = visit(ctx.primitiveType());
-
-		mg.storeLocal(1, type);
 		
 		return type;
 	}
@@ -126,18 +126,11 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	@Override
 	public Type visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
 		Type variableType = visit(ctx.type());	
+		visit(ctx.getChild(1));
 		mg.storeLocal(currentVariableIndex++, variableType);
 		
-		return visitChildren(ctx);
+		return null;
 	}
-
-	// DOES NOT WORK
-	//@Override
-	//public Type visitVariableDeclarator(OfpParser.VariableDeclaratorContext ctx) {
-	//	Type type = visit(ctx.getChild(1));
-	//	mg.storeLocal(currentVariableIndex++, type);
-	//	return null;
-	//}
 
 	@Override
 	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
@@ -249,29 +242,4 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		else
 			throw new RuntimeException("Unkown print type " + type);
 	}
-	
-	// Copied from lecture
-	/*@Override
-	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
-		mg.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
-		Type eType = visit(ctx.getChild(2)); // Push expr, return ASM expr type
-		String type = null; // Select print type
-		if (eType == Type.INT_TYPE)
-			type = "int";
-		else if (eType == Type.DOUBLE_TYPE)
-			type = "double";
-		else if (eType == Type.CHAR_TYPE)
-			type = "char";
-		else if (eType == Type.BOOLEAN_TYPE)
-			type = "boolean";
-		else if (eType.toString().equals("java.lang.String"))
-			type = "java.lang.String";
-		else
-			throw new RuntimeException("Unkown print type " + eType);
-		if (ctx.getChild(0).getText().equals("println"))
-			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void println (" + type + ")"));
-		else
-			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void print (" + type + ")"));
-		return null;
-	}*/
 }
