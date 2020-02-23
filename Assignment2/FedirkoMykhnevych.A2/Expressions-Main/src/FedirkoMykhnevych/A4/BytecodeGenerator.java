@@ -137,19 +137,29 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		currentVariableIndex = 1;
 
 		String name = ctx.IDENTIFIER().getText();
-		String returnValue = ""; // get return value here
-		String argumentTypesString = ""; // get argument types here , ex (int, int)
+		String returnValue = getTypeStringByName(ctx.getChild(0).getText()); // get return value here
+		String argumentTypesString = "()"; // get argument types here , ex (int, int)
 
-		Method method = Method.getMethod(returnValue + " " + name + " " + argumentTypesString);
+		Method method = Method.getMethod(returnValue + " " + name + argumentTypesString);
 		mg = new GeneratorAdapter(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC, method, null, null, cw);
 
 		// load arguments, method body
+		visit(ctx.getChild(3));
 
 		mg.returnValue();
 		mg.endMethod();
 
 		return null;
 	}
+	
+	@Override
+	public Type visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
+		visitChildren(ctx);
+		mg.loadLocal(currentVariableIndex);
+		
+		return null;
+	}
+
 
 	@Override
 	public Type visitUnaryMinusExpression(OfpParser.UnaryMinusExpressionContext ctx) {
@@ -158,8 +168,8 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 	@Override
 	public Type visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
-		Type lhsType = visit(ctx.expression(0));
-		Type rhsType = visit(ctx.expression(2));
+		Type lhsType = visit(ctx.getChild(0));
+		Type rhsType = visit(ctx.getChild(2));
 
 		String operator = ctx.getChild(1).getText();
 		if (operator.contentEquals("+")) {
@@ -211,6 +221,23 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		return null;
 	}
 	
+	public String getTypeStringByName(String type) {
+		if (type.contentEquals("int")) 
+			return "int";		
+		else if (type.contentEquals("float"))
+			return "float";
+		else if (type.contentEquals("char"))
+			return "char";
+		else if (type.contentEquals("bool"))
+			return "boolean";
+		else if (type.contentEquals("string"))
+			return "java.lang.String";
+		if (type.contentEquals("void")) 
+			return "void";
+		else
+			throw new RuntimeException("Unkown print type " + type);
+	}
+	
 	public String getTypename(Type exprType) {
 		String type = null;
 		
@@ -237,7 +264,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 			return Type.CHAR_TYPE;
 		else if (type.contentEquals("bool"))
 			return Type.BOOLEAN_TYPE;
-//		else if (type == "string")
+//		else if (type.contentEquals("string")
 //			return "java.lang.String";
 		else
 			throw new RuntimeException("Unkown print type " + type);
