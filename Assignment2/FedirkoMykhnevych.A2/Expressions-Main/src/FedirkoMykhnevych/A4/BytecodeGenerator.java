@@ -217,11 +217,11 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		if (exprType == Type.INT_TYPE) 
 			return "int";		
 		else if (exprType == Type.DOUBLE_TYPE)
-			return "double";
+			return "float";
 		else if (exprType == Type.CHAR_TYPE)
 			return "char";
 		else if (exprType == Type.BOOLEAN_TYPE)
-			return "boolean";
+			return "bool";
 		else if (exprType.getClassName().toString().equals("java.lang.String"))
 			return "java.lang.String";
 		else
@@ -231,11 +231,11 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	public Type getTypeByName(String type) {		
 		if (type.contentEquals("int")) 
 			return Type.INT_TYPE;		
-		else if (type.contentEquals("double"))
+		else if (type.contentEquals("float"))
 			return Type.DOUBLE_TYPE;
 		else if (type.contentEquals("char"))
 			return Type.CHAR_TYPE;
-		else if (type.contentEquals("boolean"))
+		else if (type.contentEquals("bool"))
 			return Type.BOOLEAN_TYPE;
 //		else if (type == "string")
 //			return "java.lang.String";
