@@ -1,8 +1,10 @@
 package FedirkoMykhnevych.A4;
 
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -14,6 +16,7 @@ import FedirkoMykhnevych.A2.Function;
 import FedirkoMykhnevych.A2.OfpBaseVisitor;
 import FedirkoMykhnevych.A2.OfpParser;
 import FedirkoMykhnevych.A2.Scope;
+import FedirkoMykhnevych.A2.Symbol;
 
 public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	private final ParseTreeProperty<Scope> scopes;
@@ -23,12 +26,16 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	private final ClassWriter cw;
 	private GeneratorAdapter mg;
 	private int currentVariableIndex = 1;
+	
+	private Map<String, Integer> variableIndexMap;
 
 	public BytecodeGenerator(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, String progName) {
 		this.scopes = scopes;
 		this.declaredFunctions = functions;
 		this.progName = progName;
 		this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		
+		this.variableIndexMap = new HashMap<String, Integer>();
 	}
 
 	public byte[] getByteArray() {
@@ -51,7 +58,8 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 	@Override
 	public Type visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
-		currentVariableIndex = 1;
+		currentVariableIndex = 1;		
+		currentScope = declaredFunctions.get("main");		
 		Method main = Method.getMethod("void main (String[])");
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, main, null, null, cw);
 		visitChildren(ctx); 
@@ -60,6 +68,37 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 		return Type.VOID_TYPE;
 	}
+	
+
+	@Override
+	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
+		currentVariableIndex = 1;
+
+		String name = ctx.IDENTIFIER().getText();
+		String returnValue = getTypeStringByName(ctx.getChild(0).getText()); // get return value here
+		String argumentTypesString = "()"; // get argument types here , ex (int, int)
+
+		Method method = Method.getMethod(returnValue + " " + name + argumentTypesString);
+		mg = new GeneratorAdapter(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC, method, null, null, cw);
+
+		// load arguments, method body
+		visit(ctx.getChild(3));
+
+		mg.returnValue();
+		mg.endMethod();
+
+		return null;
+	}
+	
+	
+	@Override
+	public Type visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
+		visitChildren(ctx);
+		mg.loadLocal(currentVariableIndex);
+		
+		return null;
+	}
+	
 	
 	@Override
 	public Type visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
@@ -124,52 +163,54 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	}
 	
 	@Override
-	public Type visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
-		Type variableType = visit(ctx.type());	
-		visit(ctx.getChild(1));
-		mg.storeLocal(currentVariableIndex++, variableType);
+	public Type visitVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) { 
+		visit(ctx.expression());		
+		visit(ctx.IDENTIFIER());
 		
-		return null;
-	}
-
-	@Override
-	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
-		currentVariableIndex = 1;
-
-		String name = ctx.IDENTIFIER().getText();
-		String returnValue = getTypeStringByName(ctx.getChild(0).getText()); // get return value here
-		String argumentTypesString = "()"; // get argument types here , ex (int, int)
-
-		Method method = Method.getMethod(returnValue + " " + name + argumentTypesString);
-		mg = new GeneratorAdapter(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC, method, null, null, cw);
-
-		// load arguments, method body
-		visit(ctx.getChild(3));
-
-		mg.returnValue();
-		mg.endMethod();
-
-		return null;
+		int varIdx = variableIndexMap.get(ctx.IDENTIFIER().getText());
+		
+		mg.storeLocal(varIdx);		
+		
+		return visitChildren(ctx); 
 	}
 	
 	@Override
-	public Type visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
-		visitChildren(ctx);
-		mg.loadLocal(currentVariableIndex);
+	public Type visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
+		Type variableType = visit(ctx.type());	
+		visit(ctx.getChild(1));
+		mg.storeLocal(currentVariableIndex, variableType);
 		
+		String varId = ctx.variableDeclarators().variableDeclarator(0).IDENTIFIER().getText();
+		variableIndexMap.put(varId, currentVariableIndex);
+		
+		currentVariableIndex++;
 		return null;
 	}
-
 
 	@Override
 	public Type visitUnaryMinusExpression(OfpParser.UnaryMinusExpressionContext ctx) {
 		return Type.BOOLEAN_TYPE;
 	}
 
+	
+	private Type resolveIdentifierType(String variableIdentifier) {
+		Symbol s = currentScope.resolve(variableIdentifier);		
+		return s.getType().getType();
+	}
+	
+	@Override
+	public Type visitIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) { 
+		String id = ctx.getText();
+		int varIdx = variableIndexMap.get(id);		
+		mg.loadLocal(varIdx);
+		
+		return resolveIdentifierType(id);		
+	}
+	
 	@Override
 	public Type visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
-		Type lhsType = visit(ctx.getChild(0));
-		Type rhsType = visit(ctx.getChild(2));
+		Type lhsType = visit(ctx.expression(0));
+		Type rhsType = visit(ctx.expression(1));
 
 		String operator = ctx.getChild(1).getText();
 		if (operator.contentEquals("+")) {
@@ -184,7 +225,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	@Override
 	public Type visitMulDivExpression(OfpParser.MulDivExpressionContext ctx) {
 		Type lhsType = visit(ctx.expression(0));
-		Type rhsType = visit(ctx.expression(2));
+		Type rhsType = visit(ctx.expression(1));
 
 		String operator = ctx.getChild(1).getText();
 		if (operator.contentEquals("*")) {
