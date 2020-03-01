@@ -12,10 +12,10 @@ public class Function extends Symbol implements Scope {
 	private Map<String, Symbol> params = new HashMap<String, Symbol>();
 	private Map<String, Symbol> locals = new HashMap<String, Symbol>();
 	private Map<String, Symbol> initializedVariables = new HashMap<String, Symbol>();
-	
-	private int localsCounter = 0;
+
+	private int localsCounter = 1;
 	private int paramsCounter = 0;
-	
+
 	private Map<String, Integer> localsOrderMap = new HashMap<String, Integer>();
 	private Map<String, Integer> paramsOrderMap = new HashMap<String, Integer>();
 
@@ -24,6 +24,9 @@ public class Function extends Symbol implements Scope {
 	public Function(String name, OFPType returnType) {
 		super(name, returnType);
 		this.name = name;
+		if (name.contentEquals("main")) {
+			paramsCounter++;
+		}
 	}
 
 	@Override
@@ -41,27 +44,23 @@ public class Function extends Symbol implements Scope {
 	public void initialize(Symbol sym) {
 		initializedVariables.put(sym.getName(), sym);
 	}
-	
+
 	public String getSignature() {
 		return this.getType().getStringyType() + " " + this.getName() + "(" + getParamList() + ")";
 	}
-	
+
 	private String getParamList() {
-		return params
-			.values()
-			.stream()
-			.map(x -> x.getType().getStringyType())
-			.collect(Collectors.joining(","));
+		return params.values().stream().map(x -> x.getType().getStringyType()).collect(Collectors.joining(","));
 	}
-	
+
 	public boolean isParam(String name) {
 		return params.containsKey(name);
 	}
-	
+
 	public int indexOfParam(String name) {
 		return paramsOrderMap.get(name);
 	}
-	
+
 	public int indexOfLocal(String name) {
 		return localsOrderMap.get(name);
 	}
@@ -92,7 +91,6 @@ public class Function extends Symbol implements Scope {
 		paramsOrderMap.put(parameter.getName(), paramsCounter++);
 	}
 
-	
 	public List<Symbol> getParams() {
 		return new ArrayList<Symbol>(params.values());
 	}

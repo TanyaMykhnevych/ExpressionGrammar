@@ -27,7 +27,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	final Map<String, Function> declaredFunctions;
 	private final ClassWriter cw;
 	private GeneratorAdapter mg;
-	
+
 	private Map<String, Integer> variableIndexMap;
 
 	public BytecodeGenerator(final Map<String, Function> functions, ParseTreeProperty<Scope> scopes, String progName) {
@@ -35,14 +35,14 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		this.declaredFunctions = functions;
 		this.progName = progName;
 		this.cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		
+
 		this.variableIndexMap = new HashMap<String, Integer>();
 	}
 
 	public byte[] getByteArray() {
 		return cw.toByteArray();
 	}
-	
+
 	@Override
 	public Type visitStart(OfpParser.StartContext ctx) {
 		cw.visit(Opcodes.V1_1, Opcodes.ACC_PUBLIC, progName, null, "java/lang/Object", null);
@@ -52,7 +52,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		mg.invokeConstructor(Type.getType(Object.class), m);
 		mg.returnValue();
 		mg.endMethod();
-				
+
 		visitChildren(ctx);
 
 		return null;
@@ -60,24 +60,23 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 	@Override
 	public Type visitMainFunctionDeclaration(OfpParser.MainFunctionDeclarationContext ctx) {
-		currentScope = declaredFunctions.get("main");		
+		currentScope = declaredFunctions.get("main");
 		Method main = Method.getMethod("void main (String[])");
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, main, null, null, cw);
-		visitChildren(ctx); 
+		visitChildren(ctx);
 		mg.returnValue();
 		mg.endMethod();
 
 		return Type.VOID_TYPE;
 	}
-	
 
 	@Override
-	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {	
+	public Type visitFunctionDeclaration(OfpParser.FunctionDeclarationContext ctx) {
 		String functionName = ctx.IDENTIFIER().getText();
 		currentScope = declaredFunctions.get(functionName);
-		
-		String returnValue = getTypeStringByName(ctx.getChild(0).getText());		
-		String argumentsTypes = getParamsString(ctx.params().paramsList());		
+
+		String returnValue = getTypeStringByName(ctx.getChild(0).getText());
+		String argumentsTypes = getParamsString(ctx.params().paramsList());
 		String argumentTypesString = "(" + argumentsTypes + ")";
 		String methodSign = currentScope.getSignature();
 
@@ -85,46 +84,40 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, method, null, null, cw);
 
 		visit(ctx.functionBody());
-		
+
 		mg.returnValue();
 		mg.endMethod();
 
 		return null;
 	}
-	
-	private String getParamsString(OfpParser.ParamsListContext ctx) {				
-		if(ctx == null)
+
+	private String getParamsString(OfpParser.ParamsListContext ctx) {
+		if (ctx == null)
 			return "";
-		
-		return ctx
-			.param()
-			.stream()
-			.map(x -> visit(x).getClassName())
-			.collect(Collectors.joining(","));
+
+		return ctx.param().stream().map(x -> visit(x).getClassName()).collect(Collectors.joining(","));
 	}
-	
-	
-	@Override 
+
+	@Override
 	public Type visitParam(OfpParser.ParamContext ctx) {
-		// todo: distinguish between local and param 
+		// todo: distinguish between local and param
 		Type variableType = visit(ctx.type());
-		return variableType; 
+		return variableType;
 	}
-	
+
 	@Override
 	public Type visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
 		visitChildren(ctx);
-		//mg.loadLocal(currentVariableIndex);
-		
+		// mg.loadLocal(currentVariableIndex);
+
 		return null;
 	}
-	
-	
+
 	@Override
 	public Type visitIntLiteralExpression(OfpParser.IntLiteralExpressionContext ctx) {
 		int text = Integer.parseInt(ctx.getText());
 		mg.push(new Integer(text));
-		
+
 		return Type.INT_TYPE;
 	}
 
@@ -134,7 +127,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		mg.push(new Double(text));
 		return Type.DOUBLE_TYPE;
 	}
-	
+
 	@Override
 	public Type visitBoolLiteralExpression(OfpParser.BoolLiteralExpressionContext ctx) {
 		mg.push(new Boolean(Boolean.parseBoolean(ctx.getText())));
@@ -168,54 +161,55 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		String fName = ctx.IDENTIFIER().getText();
 		Function fx = declaredFunctions.get(fName);
 		String sign = fx.getSignature();
-		
+
 		visitChildren(ctx);
-		
+
 		mg.invokeStatic(Type.getType("L" + progName + ";"), Method.getMethod(sign));
-		
+
 		return null;
 	}
-	
+
 	@Override
-	public Type visitArguments(OfpParser.ArgumentsContext ctx) { 
+	public Type visitArguments(OfpParser.ArgumentsContext ctx) {
 		if (ctx.expressionList() == null)
 			return null;
-		
+
 		visitChildren(ctx.expressionList());
-		
+
 		return null;
 	}
-	
 
-	@Override 
-	public Type visitPrimitiveType(OfpParser.PrimitiveTypeContext ctx) { 
+	@Override
+	public Type visitPrimitiveType(OfpParser.PrimitiveTypeContext ctx) {
 		return getTypeByName(ctx.getText());
 	}
 
-	@Override 
-	public Type visitType(OfpParser.TypeContext ctx) { 
+	@Override
+	public Type visitType(OfpParser.TypeContext ctx) {
 		Type type = visit(ctx.primitiveType());
-		
+
 		return type;
 	}
-	
+
 	@Override
-	public Type visitVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) { 
-		visit(ctx.expression());		
+	public Type visitVariableAssignStatement(OfpParser.VariableAssignStatementContext ctx) {
+		visit(ctx.expression());
 		visit(ctx.IDENTIFIER());
-		
-		int varIdx = variableIndexMap.get(ctx.IDENTIFIER().getText());		
+
+		int varIdx = variableIndexMap.get(ctx.IDENTIFIER().getText());
 		mg.storeLocal(varIdx);
-		
-		return null; 
+
+		return null;
 	}
-	
+
 	@Override
 	public Type visitVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
 		Type variableType = visit(ctx.type());
 		String varId = ctx.variableDeclarators().variableDeclarator(0).IDENTIFIER().getText();
-		mg.storeLocal(currentScope.indexOfLocal(varId), variableType);
-		
+		visitChildren(ctx.variableDeclarators());
+		int index = currentScope.indexOfLocal(varId);
+		mg.storeLocal(index, variableType);
+
 		return null;
 	}
 
@@ -224,28 +218,26 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		return Type.BOOLEAN_TYPE;
 	}
 
-	
 	private Type resolveIdentifierType(String variableIdentifier) {
-		Symbol s = currentScope.resolve(variableIdentifier);		
+		Symbol s = currentScope.resolve(variableIdentifier);
 		return s.getType().getAsmType();
 	}
-	
+
 	@Override
-	public Type visitIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) { 
+	public Type visitIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) {
 		String varId = ctx.getText();
-		
+
 		if (currentScope.isParam(varId)) {
 			int varIdx = currentScope.indexOfParam(varId);
 			mg.loadArg(varIdx);
+		} else {
+			int varIdx = currentScope.indexOfLocal(varId);
+			mg.loadLocal(varIdx);
 		}
-		else {
-			int varIdx = currentScope.indexOfParam(varId);
-			mg.loadArg(varIdx);
-		}
-		
-		return resolveIdentifierType(varId);		
+
+		return resolveIdentifierType(varId);
 	}
-	
+
 	@Override
 	public Type visitAddSubExpression(OfpParser.AddSubExpressionContext ctx) {
 		Type lhsType = visit(ctx.expression(0));
@@ -281,29 +273,26 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		return visit(ctx.expression());
 	}
 
-	
 	// Char type isnt working
 	@Override
 	public Type visitBuiltinFunctionCall(OfpParser.BuiltinFunctionCallContext ctx) {
 		mg.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
-		
+
 		Type exprType = visit(ctx.builtintFunctionArgument());
-		
+
 		String type = getTypename(exprType);
-		
+
 		if (ctx.builtinFunction().getText().contentEquals("print"))
-			mg.invokeVirtual(Type.getType(PrintStream.class), 
-							 Method.getMethod("void print (" + type + ")"));
+			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void print (" + type + ")"));
 		else
-			mg.invokeVirtual(Type.getType(PrintStream.class), 
-							 Method.getMethod("void println (" + type + ")"));
-		
+			mg.invokeVirtual(Type.getType(PrintStream.class), Method.getMethod("void println (" + type + ")"));
+
 		return null;
 	}
-	
+
 	public String getTypeStringByName(String type) {
-		if (type.contentEquals("int")) 
-			return "int";		
+		if (type.contentEquals("int"))
+			return "int";
 		else if (type.contentEquals("float"))
 			return "float";
 		else if (type.contentEquals("char"))
@@ -312,17 +301,17 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 			return "boolean";
 		else if (type.contentEquals("string"))
 			return "java.lang.String";
-		if (type.contentEquals("void")) 
+		if (type.contentEquals("void"))
 			return "void";
 		else
 			throw new RuntimeException("Unkown print type " + type);
 	}
-	
+
 	public String getTypename(Type exprType) {
 		String type = null;
-		
-		if (exprType == Type.INT_TYPE) 
-			return "int";		
+
+		if (exprType == Type.INT_TYPE)
+			return "int";
 		else if (exprType == Type.DOUBLE_TYPE)
 			return "double";
 		else if (exprType == Type.FLOAT_TYPE)
@@ -336,10 +325,10 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		else
 			throw new RuntimeException("Unkown print type " + type);
 	}
-	
-	public Type getTypeByName(String type) {		
-		if (type.contentEquals("int")) 
-			return Type.INT_TYPE;		
+
+	public Type getTypeByName(String type) {
+		if (type.contentEquals("int"))
+			return Type.INT_TYPE;
 		else if (type.contentEquals("float"))
 			return Type.DOUBLE_TYPE;
 		else if (type.contentEquals("char"))
