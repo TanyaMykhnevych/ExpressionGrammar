@@ -132,7 +132,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 			OFPType argType = argTypes.get(i);
 			OFPType paramType = pTypes.get(i);
 
-			if (argType.getName() != paramType.getName()) {
+			if (!argType.getName().contentEquals(paramType.getName())) {
 				ErrorPrinter.printRawString(i + "'s argument type doesn't match delcared functionParam");
 				return fSymbol.getType();
 			}

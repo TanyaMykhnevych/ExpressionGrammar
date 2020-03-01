@@ -41,6 +41,7 @@ public class SymbolTableListener extends OfpBaseListener {
 		System.out.println("Enter function: " + functionName);
 		ReturnValueContext returnCtx = ctx.returnValue();
 		OFPType returnType = returnCtx == null ? OFPType.voidType : OFPType.getTypeFor(returnCtx.getText());
+		
 		Function function = new Function(functionName, returnType);
 
 		saveScope(ctx, function);

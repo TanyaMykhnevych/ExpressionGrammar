@@ -1,3 +1,8 @@
 void main(){
-	int x;
+	printStr("string", "string2");
+}
+
+void printStr(string s, string abc) {
+	print(s);
+	print(abc);
 }

@@ -32,26 +32,51 @@ public class OFPType {
 			return boolType;
 		case "string":
 			return stringType;
+		case "void":
+			return voidType;
 		default:
 			return undefinedType;
 		}
 	}
 	
-	public Type getType() {
+	public Type getAsmType() {
 		switch (name) {
 		case "int":
 			return Type.INT_TYPE;
 		case "char":
 			return Type.CHAR_TYPE;
 		case "float":
-			return Type.FLOAT_TYPE;
+			return Type.DOUBLE_TYPE;
 		case "bool":
 			return Type.BOOLEAN_TYPE;
+		case "void":
+			return Type.VOID_TYPE;
+		case "string":
+			return Type.getObjectType("a");
 		default:
 			return null;
 		}
 	}
 
+	public String getStringyType() {
+		switch (name) {
+		case "int":
+			return "int";
+		case "char":
+			return "char";
+		case "float":
+			return "float";
+		case "bool":
+			return "boolean";
+		case "void":
+			return "void";
+		case "string":
+			return "java.lang.String";
+		default:
+			return null;
+		}
+	}
+	
 	private final String name;
 
 	public boolean IsNumberType() {
