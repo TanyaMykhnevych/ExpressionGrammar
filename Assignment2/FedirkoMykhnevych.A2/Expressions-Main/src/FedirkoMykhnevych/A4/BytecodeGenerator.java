@@ -294,7 +294,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		if (type.contentEquals("int"))
 			return "int";
 		else if (type.contentEquals("float"))
-			return "float";
+			return "double";
 		else if (type.contentEquals("char"))
 			return "char";
 		else if (type.contentEquals("bool"))
@@ -307,23 +307,21 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 			throw new RuntimeException("Unkown print type " + type);
 	}
 
-	public String getTypename(Type exprType) {
-		String type = null;
-
+	public String getTypename(Type exprType) {		
 		if (exprType == Type.INT_TYPE)
 			return "int";
 		else if (exprType == Type.DOUBLE_TYPE)
-			return "double";
+			return "float";
 		else if (exprType == Type.FLOAT_TYPE)
-			return "double";
+			return "float";
 		else if (exprType == Type.CHAR_TYPE)
 			return "char";
 		else if (exprType == Type.BOOLEAN_TYPE)
 			return "bool";
-		else if (exprType.getClassName().contentEquals(Type.getObjectType("a").getClassName()))
+		else if (exprType.getClassName().contentEquals("java.lang.String"))
 			return "java.lang.String";
 		else
-			throw new RuntimeException("Unkown print type " + type);
+			throw new RuntimeException("Unkown print type " + exprType);
 	}
 
 	public Type getTypeByName(String type) {
