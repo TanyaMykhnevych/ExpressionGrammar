@@ -136,7 +136,9 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 	@Override
 	public Type visitStringLiteralExpression(OfpParser.StringLiteralExpressionContext ctx) {
-		mg.push(ctx.getText());
+		String text = ctx.getText();
+		text = text.substring(1, text.length()-1);		
+		mg.push(text);
 		return Type.getType(String.class);
 	}
 
@@ -308,6 +310,9 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 	}
 
 	public String getTypename(Type exprType) {		
+		
+		String expss = exprType.getClassName();
+		
 		if (exprType == Type.INT_TYPE)
 			return "int";
 		else if (exprType == Type.DOUBLE_TYPE)

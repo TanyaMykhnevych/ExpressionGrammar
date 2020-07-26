@@ -1,8 +1,8 @@
 void main(){
-	printStr("string", "string2");
+	printStr("stringOne", "stringTwo");
 }
 
 void printStr(string s, string abc) {
-	print(s);
-	print(abc);
+	println(s);
+	println(abc);
 }

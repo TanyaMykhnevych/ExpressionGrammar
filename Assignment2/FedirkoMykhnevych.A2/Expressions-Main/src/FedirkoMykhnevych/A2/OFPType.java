@@ -52,7 +52,7 @@ public class OFPType {
 		case "void":
 			return Type.VOID_TYPE;
 		case "string":
-			return Type.getObjectType("a");
+			return Type.getObjectType("java.lang.String");
 		default:
 			return null;
 		}

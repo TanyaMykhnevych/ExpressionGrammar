@@ -126,7 +126,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		return buf;
 	}
 
-	@Override
+	/*@Override
 	public String visitBlock(OfpParser.BlockContext ctx) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = 1; i < ctx.getChildCount() - 1; i++) { // skip brackets
@@ -136,7 +136,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		if (buf.length() == 0) // see Issue 3
 			buf.append(indent(depth)).append("pass").append("\n");
 		return buf.toString();
-	}
+	}*/
 
 	@Override
 	public String visitBlockStatement(OfpParser.BlockStatementContext ctx) {
@@ -152,11 +152,12 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	public String visitStatement(OfpParser.StatementContext ctx) {
 		return ctx.getChild(0).getText().contentEquals(";") ? "" : visit(ctx.getChild(0));
 	}
-
+	/*
 	@Override
 	public String visitGeneralStatement(OfpParser.GeneralStatementContext ctx) {
 		return visit(ctx.getChild(0));
 	}
+	*/
 
 	@Override
 	public String visitWhileStatement(OfpParser.WhileStatementContext ctx) {
@@ -212,6 +213,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 
 	}
 
+	/*
 	@Override
 	public String visitIfBody(OfpParser.IfBodyContext ctx) {
 
@@ -224,7 +226,9 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 			return hasReturn ? indent(depth) + "return " + visit(ctx.getChild(1)) + "\n" : visit(ctx.getChild(0));
 		}
 	}
+	*/
 
+	/*
 	@Override
 	public String visitElseStatement(OfpParser.ElseStatementContext ctx) {
 		String result = indent(depth) + "else:\n";
@@ -233,7 +237,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		depth--;
 
 		return result;
-	}
+	}*/
 
 	@Override
 	public String visitIdentifierExpression(OfpParser.IdentifierExpressionContext ctx) {

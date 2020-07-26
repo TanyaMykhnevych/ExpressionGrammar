@@ -62,8 +62,8 @@ builtinFunction
     ;    
 
 functionBody
-    : block
-    | ';'
+    : statement*
+    | returnStatement*
     ;
 
 params
@@ -113,10 +113,6 @@ arrayCreator
     : '[' (']' ('[' ']')* arrayInitializer | expression ']' ('[' expression ']')* ('[' ']')*)
     ;
    
-block
-    : '{' blockStatement* '}'
-    ;
-
 blockStatement
     : variableDeclaration ';'
     | statement
@@ -158,20 +154,13 @@ booleanExpression
     | IDENTIFIER
     # identifierBooleanExpression
     ;
-    
-elseStatement
-	: ELSE ifBody;
 
-ifStatement 
-	: IF conditionExpression ifBody elseStatement?;
-	
-ifBody
-	: ifStatement
-	| generalStatement SEMI
-	| '{' ((generalStatement | RETURN expression?)  SEMI)* '}'
-	| '{' ifStatement '}'
-	| RETURN expression? SEMI
-	;
+
+ifStatement
+	: IF '(' conditionExpression ')'
+		statement
+	 ('else'
+		statement)?;
 
 unarySubstract
     : SUB (IDENTIFIER | INTEGER_LITERAL | FLOAT_LITERAL)
@@ -194,25 +183,19 @@ variableAssignStatement
 
 
 statement
-	: generalStatement
-	| SEMI
+    : '{' statement* '}'
+    | builtinFunctionCall SEMI
+    | functionCall SEMI
+    | ifStatement
+    | whileStatement
+    | IDENTIFIER ':' statement
+    | assignStatement
+    | variableDeclaration
 	| returnStatement
     ;
     
 returnStatement 
 	: RETURN expression? ';';
-    
-// for if support
-generalStatement
-    : block
-    | ifStatement
-    | whileStatement
-    | expression ';'
-    | IDENTIFIER ':' statement
-    | builtinFunctionCall
-    | assignStatement
-    | variableDeclaration
-    ;
     
 whileStatement
 	: WHILE conditionExpression statement;

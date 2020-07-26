@@ -106,7 +106,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 
 	@Override
 	public OFPType visitFunctionCall(OfpParser.FunctionCallContext ctx) {
-		String fName = ctx.getChild(0).getText();
+		String fName = ctx.IDENTIFIER().getText();
 		Function fSymbol = declaredFunctions.get(fName);
 
 		List<OFPType> pTypes = fSymbol.getParamTypes();
