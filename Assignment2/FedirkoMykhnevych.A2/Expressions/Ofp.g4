@@ -31,16 +31,16 @@ arrayType
     ;
 
 literal
-    : FLOAT_LITERAL
-    #floatLiteralExpression
-    | INTEGER_LITERAL
-    #intLiteralExpression
-    | CHAR_LITERAL
-    #charLiteralExpression
-    | STRING_LITERAL
-    #stringLiteralExpression
-    | BOOL_LITERAL
-    #boolLiteralExpression
+    : FLOAT_LITERAL 
+      #floatLiteralExpression
+    | INTEGER_LITERAL 
+      #intLiteralExpression
+    | CHAR_LITERAL #
+      charLiteralExpression
+    | STRING_LITERAL 
+      #stringLiteralExpression
+    | BOOL_LITERAL 
+      #boolLiteralExpression
     ;
 
 functionDeclaration
@@ -53,7 +53,7 @@ mainFunctionDeclaration
     ;
 
 builtinFunctionCall
-    : builtinFunction '(' builtintFunctionArgument ')'
+    : builtinFunction '(' expression ')'
     ;
 
 builtinFunction
@@ -76,10 +76,6 @@ paramsList
 
 param
     : type IDENTIFIER
-    ;
-    
-variableDeclarator
-    : IDENTIFIER ('=' variableInitializer)?
     ;
 
 returnValue
@@ -112,19 +108,11 @@ createdName
 arrayCreator
     : '[' (']' ('[' ']')* arrayInitializer | expression ']' ('[' expression ']')* ('[' ']')*)
     ;
-   
-blockStatement
-    : variableDeclaration ';'
-    | statement
-    ;
 
 variableDeclaration
-    : type variableDeclarators
+    : type IDENTIFIER ('=' variableInitializer)?
     ;
     
-variableDeclarators
-    : variableDeclarator (',' variableDeclarator)*
-    ;
 
 functionCall
     : IDENTIFIER arguments
@@ -138,26 +126,17 @@ expressionList
     : expression (',' expression)*
     ;
 
-conditionExpression
-    : '(' booleanExpression ')'
-    ;
-    
 booleanExpression
-    : functionCall
-    # functionCallBooleanExpression
-    | expression (LT | GT) expression
-    # gtLtBooleanExpression
-    | expression (EQUAL) expression
-    # booleanEqualsExpression
-    | BOOL_LITERAL
-    # booleanLiteralExpression
-    | IDENTIFIER
-    # identifierBooleanExpression
+    : functionCall 						# functionCallBooleanExpression
+    | expression (LT | GT) expression   # gtLtBooleanExpression
+    | expression (EQUAL) expression     # booleanEqualsExpression
+    | BOOL_LITERAL  					# booleanLiteralExpression
+    | IDENTIFIER   					    # identifierBooleanExpression
     ;
 
 
 ifStatement
-	: IF '(' conditionExpression ')'
+	: IF '(' booleanExpression ')'
 		statement
 	 ('else'
 		statement)?;
@@ -189,8 +168,8 @@ statement
     | ifStatement
     | whileStatement
     | IDENTIFIER ':' statement
-    | assignStatement
-    | variableDeclaration
+    | assignStatement SEMI
+    | variableDeclaration SEMI
 	| returnStatement
     ;
     
@@ -198,7 +177,7 @@ returnStatement
 	: RETURN expression? ';';
     
 whileStatement
-	: WHILE conditionExpression statement;
+	: WHILE '(' booleanExpression ')' statement;
    
 
 expression
@@ -222,10 +201,6 @@ expression
     # mulDivExpression
     | expression (ADD | SUB) expression
     # addSubExpression
-    | expression (GT | LT) expression
-    # gtLtExpression
-    | expression (EQUAL) expression
-    # equalsExpression
     | NEW creator
     # newCreatorExpression
     ;
@@ -233,10 +208,6 @@ expression
 arrayIndexExpr 
 	: expression '[' expression ']'
 	;
-
-builtintFunctionArgument
-    : expression
-    ;
 
 // ------------------------- LEXER -------------------------
 // TYPES
@@ -292,7 +263,7 @@ WS: [ \t\r\n]+ -> skip ;
 COMMENT: '#' ~[\r\n]* -> skip;
 
 // IDENTIFIER
-IDENTIFIER:         Letter Letter*;
+IDENTIFIER: Letter (Letter | Digits)*;
 
 // FRAGMENTS
 fragment Digits

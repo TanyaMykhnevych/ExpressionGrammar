@@ -1,8 +1,11 @@
-void main(){
-	printStr("stringOne", "stringTwo");
-}
+# arithmetics.txt
 
-void printStr(string s, string abc) {
-	println(s);
-	println(abc);
+void main() {
+	int a = 3;
+	int b = 2;
+
+	while(1 > 2){
+		print("aaaa!");
+	}
+	print('a');
 }

@@ -25,4 +25,8 @@ public class Symbol {
 	public OFPType getType() {
 		return type;
 	}
+	
+	public boolean isDouble() {
+		return type.equals(OFPType.boolType);
+	}
 }

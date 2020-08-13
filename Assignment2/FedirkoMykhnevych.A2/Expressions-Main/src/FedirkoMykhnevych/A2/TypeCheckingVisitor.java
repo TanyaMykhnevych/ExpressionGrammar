@@ -51,30 +51,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	}
 
 	@Override
-	public OFPType visitGtLtExpression(OfpParser.GtLtExpressionContext ctx) {
-		OFPType lhsType = visit(ctx.expression(0));
-		OFPType rhsType = visit(ctx.expression(1));
-
-		if (lhsType.equals(OFPType.stringType) || rhsType.equals(OFPType.stringType)) {
-			ErrorPrinter.printRawString("Operatos '>', '<' cannot be applied to string comparison");
-			return null;
-		}
-
-		if (lhsType.IsArrayType() || rhsType.IsArrayType()) {
-			ErrorPrinter.printRawString("Operatos '>', '<' cannot be applied to compare arrays");
-			return null;
-		}
-
-		if (!lhsType.equals(rhsType)) {
-			ErrorPrinter.printRawString("Operatos '>', '<' cannot be applied to operands of type " + "'" + lhsType + "'"
-					+ " and " + "'" + rhsType + "'");
-			return null;
-		} else {
-			return OFPType.boolType;
-		}
-	}
-
-	@Override
 	public OFPType visitBooleanLiteralExpression(OfpParser.BooleanLiteralExpressionContext ctx) {
 		return OFPType.boolType;
 	}
@@ -244,7 +220,7 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 	public OFPType visitWhileStatement(OfpParser.WhileStatementContext ctx) {
 		currentScope = scopes.get(ctx);
 
-		OFPType booleanExpression = visit(ctx.conditionExpression().booleanExpression());
+		OFPType booleanExpression = visit(ctx.booleanExpression());
 
 		if (!booleanExpression.equals(OFPType.boolType)) {
 			ErrorPrinter.printFullError(parser, ctx.WHILE().getSymbol(), "Incompatible types in while condition: ",
@@ -253,30 +229,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return null;
 	}
 
-	@Override
-	public OFPType visitEqualsExpression(OfpParser.EqualsExpressionContext ctx) {
-		OFPType lhsType = visit(ctx.expression(0));
-		OFPType rhsType = visit(ctx.expression(1));
-
-		if (lhsType.equals(OFPType.stringType) || rhsType.equals(OFPType.stringType)) {
-			ErrorPrinter.printRawString("Operator '==' cannot be applied to string comparison");
-
-			return null;
-		}
-
-		if (lhsType.IsArrayType() || rhsType.IsArrayType()) {
-			ErrorPrinter.printRawString("Operator '==' cannot be applied to compare arrays");
-			return null;
-		}
-
-		if (!lhsType.equals(rhsType)) {
-			ErrorPrinter.printRawString("Operator '==' cannot be applied to operands of type " + "'" + lhsType + "'"
-					+ " and " + "'" + rhsType + "'");
-			return null;
-		} else {
-			return OFPType.boolType;
-		}
-	}
 
 	// Same as 'visitEqualsExpression()'
 	@Override
@@ -304,16 +256,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		}
 	}
 
-	@Override
-	public OFPType visitBuiltintFunctionArgument(OfpParser.BuiltintFunctionArgumentContext ctx) {
-		OFPType argType = visit(ctx.getChild(0));
-
-		if (argType.IsArrayType()) {
-			ErrorPrinter.printRawString("Built-in print functions doesn't support arrays");
-		}
-
-		return null;
-	}
 
 	@Override
 	public OFPType visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
@@ -358,10 +300,6 @@ public class TypeCheckingVisitor extends OfpBaseVisitor<OFPType> {
 		return null;
 	}
 
-	@Override
-	public OFPType visitConditionExpression(OfpParser.ConditionExpressionContext ctx) {
-		return visitChildren(ctx);
-	}
 
 	@Override
 	public OFPType visitFunctionCallBooleanExpression(OfpParser.FunctionCallBooleanExpressionContext ctx) {

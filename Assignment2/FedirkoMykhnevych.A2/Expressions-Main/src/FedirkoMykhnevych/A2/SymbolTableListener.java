@@ -1,12 +1,9 @@
 package FedirkoMykhnevych.A2;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import FedirkoMykhnevych.A2.OfpBaseListener;
 import FedirkoMykhnevych.A2.OfpParser;
@@ -129,23 +126,25 @@ public class SymbolTableListener extends OfpBaseListener {
 
 	@Override
 	public void enterVariableDeclaration(OfpParser.VariableDeclarationContext ctx) {
-
 		OFPType type = OFPType.getTypeFor(ctx.type().getText());
+		String identifier = ctx.IDENTIFIER().getText();
 
-		List<TerminalNode> identifiers = ctx.variableDeclarators().variableDeclarator().stream()
-				.map(x -> x.IDENTIFIER()).collect(Collectors.toList());
+		Symbol s = new Symbol(identifier, type);
 
-		for (TerminalNode tn : identifiers) {
-			Symbol s = new Symbol(tn.getText(), type);
+		System.out.println(
+				"Enter variable declaration. Name: " + s.getName() 
+			  + " Type: " + s.getType().getName());
 
-			System.out.println("Enter variable declaration. Name: " + s.getName() + " Type: " + s.getType().getName());
+		if (currentScope.resolve(s.getName()) != null)
+			ErrorPrinter.printFullError(
+					parser, 
+					ctx.IDENTIFIER().getSymbol(), 
+					"Duplicate variable declaration: ", 
+					s.getName(),
+					currentScope.getScopeName());
+		else
+			currentScope.define(s);
 
-			if (currentScope.resolve(s.getName()) != null)
-				ErrorPrinter.printFullError(parser, tn.getSymbol(), "Duplicate variable declaration: ", s.getName(),
-						currentScope.getScopeName());
-			else
-				currentScope.define(s);
-		}
 	}
 
 	private void exitScope() {

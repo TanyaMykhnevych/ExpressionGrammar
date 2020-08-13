@@ -9,9 +9,8 @@ import java.util.stream.Collectors;
 
 public class Function extends Symbol implements Scope {
 
-	private Map<String, Symbol> params = new HashMap<String, Symbol>();
+	private Map<String, Symbol> params = new LinkedHashMap<String, Symbol>();
 	private Map<String, Symbol> locals = new HashMap<String, Symbol>();
-	private Map<String, Symbol> initializedVariables = new HashMap<String, Symbol>();
 
 	private int localsCounter = 1;
 	private int paramsCounter = 0;
@@ -36,13 +35,16 @@ public class Function extends Symbol implements Scope {
 
 	@Override
 	public void define(Symbol sym) {
+		if(sym.isDouble())
+			localsCounter++;
+			
 		locals.put(sym.getName(), sym);
-		localsOrderMap.put(sym.getName(), localsCounter++);
+		localsOrderMap.put(sym.getName(), localsCounter++);		
 	}
 
 	@Override
 	public void initialize(Symbol sym) {
-		initializedVariables.put(sym.getName(), sym);
+		// initializedVariables.put(sym.getName(), sym);
 	}
 
 	public String getSignature() {
@@ -90,13 +92,20 @@ public class Function extends Symbol implements Scope {
 		params.put(parameter.getName(), parameter);
 		paramsOrderMap.put(parameter.getName(), paramsCounter++);
 	}
-
-	public List<Symbol> getParams() {
-		return new ArrayList<Symbol>(params.values());
+	
+	public String getParsAndLocalsAsStr() {
+		String result = "";
+		
+	//	for( param: params.values()) {
+	//		
+	//	}
+		
+		return result;
 	}
 
+
 	public List<OFPType> getParamTypes() {
-		List<Symbol> parameterList = getParams();
+		List<Symbol> parameterList = new ArrayList<Symbol>(params.values());
 		List<OFPType> paramTypes = new ArrayList<OFPType>();
 		for (Symbol var : parameterList) {
 			paramTypes.add(var.getType());

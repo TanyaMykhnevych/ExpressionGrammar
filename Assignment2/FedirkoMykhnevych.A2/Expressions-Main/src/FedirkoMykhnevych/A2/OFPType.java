@@ -65,7 +65,7 @@ public class OFPType {
 		case "char":
 			return "char";
 		case "float":
-			return "float";
+			return "double";
 		case "bool":
 			return "boolean";
 		case "void":

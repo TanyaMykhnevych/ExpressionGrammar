@@ -126,22 +126,6 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		return buf;
 	}
 
-	/*@Override
-	public String visitBlock(OfpParser.BlockContext ctx) {
-		StringBuilder buf = new StringBuilder();
-		for (int i = 1; i < ctx.getChildCount() - 1; i++) { // skip brackets
-			String stmt = visit(ctx.getChild(i));
-			buf.append(stmt);
-		}
-		if (buf.length() == 0) // see Issue 3
-			buf.append(indent(depth)).append("pass").append("\n");
-		return buf.toString();
-	}*/
-
-	@Override
-	public String visitBlockStatement(OfpParser.BlockStatementContext ctx) {
-		return visit(ctx.getChild(0));
-	}
 
 	@Override
 	public String visitBracketsExpression(OfpParser.BracketsExpressionContext ctx) {
@@ -152,12 +136,6 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	public String visitStatement(OfpParser.StatementContext ctx) {
 		return ctx.getChild(0).getText().contentEquals(";") ? "" : visit(ctx.getChild(0));
 	}
-	/*
-	@Override
-	public String visitGeneralStatement(OfpParser.GeneralStatementContext ctx) {
-		return visit(ctx.getChild(0));
-	}
-	*/
 
 	@Override
 	public String visitWhileStatement(OfpParser.WhileStatementContext ctx) {
@@ -168,27 +146,15 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 		return indent(depth) + whilefCondition + whileBody;
 	}
 
-	@Override
-	public String visitConditionExpression(OfpParser.ConditionExpressionContext ctx) {
-		return visit(ctx.getChild(1));
-	}
 
 	@Override
 	public String visitGtLtBooleanExpression(OfpParser.GtLtBooleanExpressionContext ctx) {
 		return visit(ctx.expression(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.expression(1));
 	}
 
-	@Override
-	public String visitGtLtExpression(OfpParser.GtLtExpressionContext ctx) {
-		return visit(ctx.expression(0)) + " " + ctx.getChild(1).getText() + " " + visit(ctx.expression(1));
-	}
 
 	@Override
 	public String visitBooleanEqualsExpression(OfpParser.BooleanEqualsExpressionContext ctx) {
-		return visit(ctx.expression(0)) + " == " + visit(ctx.expression(1));
-	}
-
-	public String visitEqualsExpression(OfpParser.EqualsExpressionContext ctx) {
 		return visit(ctx.expression(0)) + " == " + visit(ctx.expression(1));
 	}
 
@@ -384,11 +350,6 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	@Override
 	public String visitBuiltinFunction(OfpParser.BuiltinFunctionContext ctx) {
 		return ctx.getChild(0).getText();
-	}
-
-	@Override
-	public String visitBuiltintFunctionArgument(OfpParser.BuiltintFunctionArgumentContext ctx) {
-		return visit(ctx.getChild(0));
 	}
 
 	@Override

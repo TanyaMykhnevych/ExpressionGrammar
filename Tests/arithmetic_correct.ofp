@@ -1,6 +1,6 @@
 void main() {
 	float a = 5.2;
-	int c = 7;
+	float c = 7;
 	float b = -0.3;
 	println(a + b * c / (a - 8));
 	
@@ -17,14 +17,18 @@ void twoNumbersSum() {
 	int sum;
 	sum = num1 + num2;
 
-	println("Sum of these numbers: " + sum);
+	print("Sum of these numbers: ");
+	print(sum);
 }
 
 float area() {
 	 float length = 4.5;
 	 float width = 8.0;
 	 float area = length*width;
-	 println("Area of Rectangle is:"+area);
+	 print("Area of Rectangle is:");
+	 print(area);
+
+	 return area;
 }
 
 int fact(int n) {
