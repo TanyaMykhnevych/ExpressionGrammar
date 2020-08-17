@@ -40,4 +40,17 @@ public final class TypeUtil {
 		else
 			throw new RuntimeException("Unkown print type " + exprType);
 	}
+	
+	public static int GetBooleanOp(GeneratorAdapter mg, String operator) {
+		if (operator.contentEquals("<"))
+			return mg.GE;					// hack for if (this is how java works)
+		if (operator.contentEquals("<="))
+			return mg.LE;
+		if (operator.contentEquals(">"))
+			return mg.LE;					// hack for if (this is how java works)
+		if (operator.contentEquals(">="))
+			return mg.GE;
+		
+		return -1;
+	}
 }

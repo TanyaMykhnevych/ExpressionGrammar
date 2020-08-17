@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.Stack;
 
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -13,6 +14,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import FedirkoMykhnevych.A2.Function;
+import FedirkoMykhnevych.A2.OFPType;
 import FedirkoMykhnevych.A2.OfpBaseVisitor;
 import FedirkoMykhnevych.A2.OfpParser;
 import FedirkoMykhnevych.A2.Scope;
@@ -76,8 +78,10 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		mg = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, method, null, null, cw);
 
 		visit(ctx.functionBody());
-
-		mg.returnValue();
+		
+		//if (currentScope.getType().equals(OFPType.voidType))
+			mg.returnValue();
+		
 		mg.endMethod();
 		return null;
 	}
@@ -89,20 +93,38 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 			Label enterWhile = mg.mark();
 			visit(ctx.statement());
 		mg.mark(exitWhile);
-		mg.loadLocal(1);
-		mg.loadLocal(2);
-		mg.ifICmp(mg.LE, enterWhile);
 		
-		//visit(ctx.booleanExpression());
-		
+		this.labelStack.push(enterWhile);		
+		visit(ctx.booleanExpression());	
 		
 		return null; 
 	}
 	
+	@Override 
+	public Type visitIfElseStatement(OfpParser.IfElseStatementContext ctx) { 
+		Label enterElse = mg.newLabel();
+		Label exitElse = mg.newLabel();
+		
+		labelStack.push(enterElse);		
+		visit(ctx.booleanExpression()); // todo: eqals '=='
+		visit(ctx.statement(0));
+		mg.goTo(exitElse);
+		
+		mg.mark(enterElse);
+		visit(ctx.statement(1));
+		mg.mark(exitElse);
+		
+		return null;		
+	}
+	
 	@Override
 	public Type visitGtLtBooleanExpression(OfpParser.GtLtBooleanExpressionContext ctx) {
-		visit(ctx.expression(0));
+		Type type = visit(ctx.expression(0));
 		visit(ctx.expression(1));
+		
+		int opInstr = TypeUtil.GetBooleanOp(mg, ctx.getChild(1).getText());
+		//mg.ifZCmp(opInstr, labelStack.pop());
+		mg.ifCmp(type, opInstr, labelStack.pop()); // for specific type
 		
 		return Type.BOOLEAN_TYPE;
 	}
@@ -116,7 +138,10 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 
 	@Override
 	public Type visitReturnStatement(OfpParser.ReturnStatementContext ctx) {
-		visitChildren(ctx);
+		if (ctx.expression() != null)
+			visit(ctx.expression());
+		
+		mg.returnValue();
 		return null;
 	}
 

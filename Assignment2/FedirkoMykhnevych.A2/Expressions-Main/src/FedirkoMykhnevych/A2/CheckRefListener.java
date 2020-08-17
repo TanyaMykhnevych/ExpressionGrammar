@@ -33,12 +33,12 @@ public class CheckRefListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterIfStatement(OfpParser.IfStatementContext ctx) {
+	public void enterIfElseStatement(OfpParser.IfElseStatementContext ctx) {
 		enterScope(ctx);
 	}
 
 	@Override
-	public void exitIfStatement(OfpParser.IfStatementContext ctx) {
+	public void exitIfElseStatement(OfpParser.IfElseStatementContext ctx) {
 		exitScope();
 	}
 

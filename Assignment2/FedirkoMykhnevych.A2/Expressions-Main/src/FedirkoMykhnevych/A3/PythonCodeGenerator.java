@@ -169,7 +169,7 @@ public class PythonCodeGenerator extends OfpBaseVisitor<String> {
 	}
 
 	@Override
-	public String visitIfStatement(OfpParser.IfStatementContext ctx) {
+	public String visitIfElseStatement(OfpParser.IfElseStatementContext ctx) {
 		String ifCondition = "if " + visit(ctx.getChild(1)) + ":\n";
 		depth++;
 		String ifBody = visit(ctx.getChild(2));

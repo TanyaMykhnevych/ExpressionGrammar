@@ -1,11 +1,21 @@
-# arithmetics.txt
+# arithmetics.ofp, boolean.ofp, float.ofp, and max.ofp
 
 void main() {
-	int a = 3;
-	int b = 2;
+	float f = 2.34;
+	float ff = 2.0;
+	float fff = mult(f,5,ff);
+	println(fff);  # 4.68
+	
+	fff  = max(f,ff);  
+	println(fff);  # false
 
-	while(1 > 2){
-		print("aaaa!");
-	}
-	print('a');
+}
+
+float mult(float a, int n, float b) {
+   return a * b;
+}
+
+float max(float a, float b) {
+   if (a>b) return a;
+   else return b;
 }

@@ -128,14 +128,14 @@ expressionList
 
 booleanExpression
     : functionCall 						# functionCallBooleanExpression
-    | expression (LT | GT) expression   # gtLtBooleanExpression
+    | expression (LT | LE | GT | GE) expression   # gtLtBooleanExpression
     | expression (EQUAL) expression     # booleanEqualsExpression
     | BOOL_LITERAL  					# booleanLiteralExpression
     | IDENTIFIER   					    # identifierBooleanExpression
     ;
 
 
-ifStatement
+ifElseStatement
 	: IF '(' booleanExpression ')'
 		statement
 	 ('else'
@@ -165,7 +165,7 @@ statement
     : '{' statement* '}'
     | builtinFunctionCall SEMI
     | functionCall SEMI
-    | ifStatement
+    | ifElseStatement
     | whileStatement
     | IDENTIFIER ':' statement
     | assignStatement SEMI
@@ -242,9 +242,11 @@ COMMA: ',';
 DOT: '.';
 
 // OPERATIONS
-ASSIGN: '=';
-GT: '>';
-LT: '<';
+ASSIGN : '=';
+GT     : '>';
+GE     : '>=';
+LT	   : '<';
+LE	   : '<=';
 EQUAL: '==';
 ADD: '+';
 SUB: '-';

@@ -97,7 +97,7 @@ public class SymbolTableListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void enterIfStatement(OfpParser.IfStatementContext ctx) {
+	public void enterIfElseStatement(OfpParser.IfElseStatementContext ctx) {
 		System.out.println("Enter IF statement");
 		Scope ifScope = new BaseScope(currentScope);
 		saveScope(ctx, ifScope);
@@ -105,7 +105,7 @@ public class SymbolTableListener extends OfpBaseListener {
 	}
 
 	@Override
-	public void exitIfStatement(OfpParser.IfStatementContext ctx) {
+	public void exitIfElseStatement(OfpParser.IfElseStatementContext ctx) {
 		System.out.println("Exit IF statement");
 		exitScope();
 	}
