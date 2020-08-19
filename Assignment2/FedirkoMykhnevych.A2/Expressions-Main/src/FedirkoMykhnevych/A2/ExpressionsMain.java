@@ -85,7 +85,9 @@ public class ExpressionsMain {
 		ClassVisitor checker = new CheckClassAdapter(tracer, true);
 		cr.accept(checker, 0);
 
-		File javaOutFile = new File("test_class_files/" + progName + ".class");
+		File javaOutFile = new File(progName + ".class");
+		//File javaOutFile = new File("test_class_files/" + progName + ".class");
+		
 		FileOutputStream fos = new FileOutputStream(javaOutFile);
 		fos.write(code);
 		fos.close();

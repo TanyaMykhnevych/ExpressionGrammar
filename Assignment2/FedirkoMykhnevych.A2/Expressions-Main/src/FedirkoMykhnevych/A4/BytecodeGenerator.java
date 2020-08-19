@@ -80,7 +80,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		visit(ctx.functionBody());
 		
 		//if (currentScope.getType().equals(OFPType.voidType))
-			mg.returnValue();
+			//mg.returnValue();
 		
 		mg.endMethod();
 		return null;
@@ -108,7 +108,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		labelStack.push(enterElse);		
 		visit(ctx.booleanExpression()); // todo: eqals '=='
 		visit(ctx.statement(0));
-		mg.goTo(exitElse);
+		//mg.goTo(exitElse);
 		
 		mg.mark(enterElse);
 		visit(ctx.statement(1));
@@ -122,8 +122,7 @@ public class BytecodeGenerator extends OfpBaseVisitor<Type> {
 		Type type = visit(ctx.expression(0));
 		visit(ctx.expression(1));
 		
-		int opInstr = TypeUtil.GetBooleanOp(mg, ctx.getChild(1).getText());
-		//mg.ifZCmp(opInstr, labelStack.pop());
+		int opInstr = TypeUtil.GetBooleanOpInverted(mg, ctx.getChild(1).getText());
 		mg.ifCmp(type, opInstr, labelStack.pop()); // for specific type
 		
 		return Type.BOOLEAN_TYPE;

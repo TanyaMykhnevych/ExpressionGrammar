@@ -43,13 +43,26 @@ public final class TypeUtil {
 	
 	public static int GetBooleanOp(GeneratorAdapter mg, String operator) {
 		if (operator.contentEquals("<"))
-			return mg.GE;					// hack for if (this is how java works)
+			return mg.LT;
 		if (operator.contentEquals("<="))
 			return mg.LE;
 		if (operator.contentEquals(">"))
-			return mg.LE;					// hack for if (this is how java works)
+			return mg.GT;
 		if (operator.contentEquals(">="))
 			return mg.GE;
+		
+		return -1;
+	}
+	
+	public static int GetBooleanOpInverted(GeneratorAdapter mg, String operator) {
+		if (operator.contentEquals("<"))
+			return mg.GE;
+		if (operator.contentEquals("<="))
+			return mg.GT;
+		if (operator.contentEquals(">"))
+			return mg.LE;
+		if (operator.contentEquals(">="))
+			return mg.LT;
 		
 		return -1;
 	}
